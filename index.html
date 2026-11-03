@@ -1,0 +1,359 @@
+<title>Moto Mboka</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Archivo:wght@400;600;800&display=swap">
+<style>
+/* Layout: plein écran 3D, HUD en bandeaux d'enseigne peinte, commandes tactiles aux coins */
+:root{
+  --asphalt:#17191e; --ink:#f6f1e4; --taxi:#f2c230; --rdc:#0a6ed1; --rouge:#ce1126; --terre:#c8794a;
+  --display:"Bungee","Arial Black",Impact,sans-serif; --body:"Archivo",system-ui,sans-serif;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--asphalt);color:var(--ink);font-family:var(--body);touch-action:none;user-select:none;-webkit-user-select:none}
+#c{position:fixed;inset:0;display:block;width:100%;height:100%}
+.hud{position:fixed;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;
+  padding-top:calc(10px + env(safe-area-inset-top,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));pointer-events:none}
+.plate{background:var(--asphalt);border:2px solid var(--taxi);padding:6px 10px;font-variant-numeric:tabular-nums;box-shadow:3px 3px 0 var(--rouge)}
+.plate b{font-family:var(--display);color:var(--taxi);font-size:20px;font-weight:400;display:block;line-height:1.1}
+.plate small{font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+.street{background:var(--rdc);color:#fff;border:2px solid #fff;padding:4px 12px;text-align:center;font-family:var(--display);font-size:13px;max-width:44vw;text-wrap:balance}
+.street small{display:block;font-family:var(--body);font-size:10px;letter-spacing:.06em;opacity:.9}
+#mission{position:fixed;left:50%;transform:translateX(-50%);top:calc(74px + env(safe-area-inset-top,0px));background:rgba(23,25,30,.85);padding:6px 14px;font-weight:600;font-size:14px;border-left:4px solid var(--taxi);max-width:86vw;text-align:center;pointer-events:none}
+#toast{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);font-family:var(--display);font-size:clamp(26px,7vw,54px);color:var(--taxi);text-shadow:3px 3px 0 var(--rouge),0 0 18px #000;pointer-events:none;opacity:0;transition:opacity .25s;text-align:center;white-space:nowrap}
+#mini{position:fixed;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));width:110px;height:110px;background:rgba(23,25,30,.8);border:2px solid var(--taxi)}
+#speed{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(150px + env(safe-area-inset-bottom,0px));font-family:var(--display);font-size:34px;color:var(--ink);text-align:right;text-shadow:2px 2px 0 #000;pointer-events:none;font-variant-numeric:tabular-nums}
+#speed small{display:block;font-family:var(--body);font-size:11px;letter-spacing:.1em}
+.pad{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;gap:10px}
+.pad.l{left:calc(132px + env(safe-area-inset-left,0px))}
+.pad.r{right:max(14px,env(safe-area-inset-right,0px))}
+.pad button{width:64px;height:64px;border-radius:50%;border:3px solid var(--ink);background:rgba(23,25,30,.55);color:var(--ink);font-family:var(--display);font-size:22px;touch-action:none}
+.pad button.gas{background:var(--taxi);color:var(--asphalt);border-color:var(--asphalt);width:76px;height:76px}
+.pad button.brk{background:var(--rouge);color:#fff}
+.pad button:active,.pad button.on{transform:scale(.93);filter:brightness(1.2)}
+@media (hover:hover) and (pointer:fine){.pad{opacity:.35}}
+.screen{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(180deg,rgba(23,25,30,.55),rgba(23,25,30,.92));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.card{max-width:440px;width:100%;display:grid;gap:14px;text-align:left}
+.kicker{display:inline-block;justify-self:start;background:var(--taxi);color:var(--asphalt);font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(44px,13vw,76px);line-height:.92;margin:0;color:var(--ink);text-wrap:balance}
+h1 span{color:var(--taxi);display:block}
+.card p{margin:0;line-height:1.5;font-size:15px;max-width:60ch}
+.keys{font-size:13px;opacity:.85;line-height:1.6}
+.keys kbd{font-family:var(--body);border:1px solid var(--ink);padding:0 5px;font-size:12px}
+.cta{font-family:var(--display);font-size:22px;background:var(--taxi);color:var(--asphalt);border:0;padding:14px 22px;box-shadow:5px 5px 0 var(--rouge);cursor:pointer;justify-self:start}
+.cta:focus-visible,.ghost:focus-visible{outline:3px solid var(--rdc);outline-offset:3px}
+.ghost{font-family:var(--body);font-weight:700;font-size:14px;background:transparent;color:var(--ink);border:2px solid var(--ink);padding:10px 16px;cursor:pointer}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats div{border:2px solid var(--taxi);padding:8px;font-variant-numeric:tabular-nums}
+.stats b{font-family:var(--display);font-weight:400;font-size:22px;color:var(--taxi);display:block}
+.stats small{font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.fine{font-size:12px;opacity:.65}
+.city{font-family:var(--body);font-weight:700;font-size:13px;background:transparent;color:var(--ink);border:2px solid var(--ink);padding:6px 10px;cursor:pointer}
+.city[aria-pressed="true"]{background:var(--ink);color:var(--asphalt)}
+.city:focus-visible{outline:3px solid var(--taxi);outline-offset:2px}
+#cities{gap:8px}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+</style>
+
+<canvas id="c"></canvas>
+
+<div class="hud" id="hud" hidden>
+  <div class="plate"><b id="fc">0 FC</b><small id="clients">0 client</small></div>
+  <div class="street" id="street">Boulevard Lumumba<small>Tronçon 1</small></div>
+  <div class="plate" style="text-align:right"><b id="time">0:00</b><small>chrono</small></div>
+</div>
+<div id="mission" hidden></div>
+<div id="toast"></div>
+<canvas id="mini" width="220" height="220" hidden></canvas>
+<div id="speed" hidden>0<small>KM/H</small></div>
+<div class="pad l" id="padL" hidden><button id="bL" aria-label="Gauche">◀</button><button id="bR" aria-label="Droite">▶</button></div>
+<div class="pad r" id="padR" hidden><button id="bB" class="brk" aria-label="Freiner">■</button><button id="bG" class="gas" aria-label="Accélérer">▲</button></div>
+
+<div class="screen" id="start">
+  <div class="card">
+    <span class="kicker" id="kick">wewa · Kinshasa</span>
+    <h1>Moto <span>Mboka</span></h1>
+    <div class="row" id="cities" role="group" aria-label="Choisis ta ville"></div>
+    <p id="intro"></p>
+    <p class="keys">Clavier : <kbd>↑</kbd> gaz · <kbd>↓</kbd> frein · <kbd>←</kbd><kbd>→</kbd> direction. Mobile : boutons à l'écran.</p>
+    <div class="row"><button class="cta" id="play">Démarrer</button><span class="fine" id="best"></span></div>
+  </div>
+</div>
+
+<div class="screen" id="end" hidden>
+  <div class="card">
+    <span class="kicker" id="endKick">Arrivée</span>
+    <h1>Course <span>terminée</span></h1>
+    <div class="stats">
+      <div><b id="eFc">0</b><small>gagnés</small></div>
+      <div><b id="eCl">0</b><small>clients</small></div>
+      <div><b id="eT">0:00</b><small>temps</small></div>
+    </div>
+    <p id="eMsg"></p>
+    <div class="row"><button class="cta" id="again">Rejouer</button><button class="ghost" id="share">Copier mon score</button></div>
+    <p class="fine">Tracés inspirés des grands axes de chaque ville. Prototype.</p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const canvas=$('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene=new THREE.Scene();
+const SKY=0xe9b98a;
+scene.background=new THREE.Color(SKY);
+scene.fog=new THREE.Fog(SKY,120,520);
+const camera=new THREE.PerspectiveCamera(62,1,0.1,1200);
+scene.add(new THREE.HemisphereLight(0xfff1d6,0x6b4a33,0.85));
+const sun=new THREE.DirectionalLight(0xffd9a8,0.9);sun.position.set(-80,120,40);scene.add(sun);
+function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<h?74:60;camera.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+
+/* ---------- Tracé ---------- */
+/* Villes : ajouter une capitale = ajouter une entrée ici */
+const CITIES={
+ kinshasa:{name:'Kinshasa',country:'RDC',moto:'wewa',cur:'FC',rate:1,taxi:0xf2c230,bus:[0xf4f4f0,0x0a6ed1],earth:0xb5714a,sky:0xe9b98a,
+  wp:[[0,0],[0,-420],[160,-820],[170,-1240],[-80,-1640],[-90,-2060],[120,-2460],[320,-2760],[330,-3160],[120,-3560],[110,-3980]],
+  streets:[[0,'Boulevard Lumumba'],[0.26,'Avenue de la Libération'],[0.5,'Boulevard Triomphal'],[0.7,'Boulevard du 30 Juin']],
+  stops:[['Échangeur de Limete',0.02],['Pont Matete',0.12],['UPC',0.27],['Stade des Martyrs',0.41],['Rond-point Victoire',0.53],['Palais du Peuple',0.64],['Hôtel de Ville',0.78],['Gare Centrale',0.985]]},
+ abidjan:{name:'Abidjan',country:'Côte d’Ivoire',moto:'moto-taxi',cur:'FCFA',rate:0.25,taxi:0xf28c28,bus:[0x2e9e5b,0xf2c230],earth:0xa86a45,sky:0xf0c79a,
+  wp:[[0,0],[-60,-400],[-60,-800],[140,-1150],[300,-1500],[300,-1950],[120,-2300],[-80,-2650],[-80,-3100],[100,-3500]],
+  streets:[[0,'Boulevard de Marseille'],[0.3,'Boulevard VGE'],[0.55,'Pont Houphouët-Boigny'],[0.75,'Boulevard de la République']],
+  stops:[['Port-Bouët',0.02],['Koumassi',0.14],['Marcory',0.3],['Treichville',0.47],['Gare de Bassam',0.6],['Plateau',0.78],['Gare du Nord',0.985]]},
+ dakar:{name:'Dakar',country:'Sénégal',moto:'Jakarta',cur:'FCFA',rate:0.25,taxi:0xf2c230,bus:[0xf4f4f0,0xce1126],earth:0xc9a06a,sky:0xf3d3a6,
+  wp:[[0,0],[120,-380],[120,-800],[-40,-1200],[-200,-1550],[-200,-2000],[0,-2400],[200,-2700],[200,-3150]],
+  streets:[[0,'Route de Ouakam'],[0.3,'Avenue Cheikh Anta Diop'],[0.6,'Corniche Ouest'],[0.8,'Avenue Pompidou']],
+  stops:[['Ouakam',0.02],['Mermoz',0.16],['UCAD',0.33],['Fann',0.48],['Médina',0.64],['Sandaga',0.8],['Place de l’Indépendance',0.985]]},
+ lagos:{name:'Lagos',country:'Nigeria',moto:'okada',cur:'₦',rate:0.6,taxi:0xf2c230,bus:[0xf2c230,0x17191e],earth:0x9c6a48,sky:0xe8c39c,
+  wp:[[0,0],[0,-500],[-150,-900],[-150,-1400],[60,-1800],[260,-2200],[260,-2700],[60,-3100],[60,-3600],[-100,-4000]],
+  streets:[[0,'Ikorodu Road'],[0.3,'Herbert Macaulay Way'],[0.55,'Third Mainland Bridge'],[0.8,'Marina']],
+  stops:[['Ojota',0.02],['Maryland',0.13],['Yaba',0.28],['Ebute Metta',0.44],['Oyingbo',0.58],['Idumota',0.76],['CMS',0.985]]},
+ kampala:{name:'Kampala',country:'Ouganda',moto:'boda-boda',cur:'UGX',rate:1.4,taxi:0xf4f4f0,bus:[0xf4f4f0,0x0a6ed1],earth:0x9b5a3a,sky:0xdfc6a0,
+  wp:[[0,0],[100,-350],[100,-750],[-80,-1100],[-80,-1550],[120,-1900],[300,-2250],[300,-2700]],
+  streets:[[0,'Jinja Road'],[0.35,'Kampala Road'],[0.65,'Entebbe Road']],
+  stops:[['Nakawa',0.02],['Lugogo',0.18],['Kololo',0.34],['Wandegeya',0.5],['Old Taxi Park',0.68],['Nakasero',0.84],['Kibuye',0.985]]}
+};
+let CITY,CKEY,curve,L,STREETS=[],STOPS=[];const N=1600,P=[],T=[];
+function loadRoute(c){P.length=T.length=0;curve=new THREE.CatmullRomCurve3(c.wp.map(p=>new THREE.Vector3(p[0],0,p[1])));L=curve.getLength();
+  for(let i=0;i<N;i++){const u=i/(N-1);P.push(curve.getPointAt(u));T.push(curve.getTangentAt(u).normalize());}
+  STREETS=c.streets;STOPS=c.stops.map(([n,u])=>({name:n,s:u*L}));}
+const world=new THREE.Group();scene.add(world);
+function person(){const g=new THREE.Group();
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(.42,.48,1.5,8),new THREE.MeshLambertMaterial({color:CLOTH[(Math.random()*6)|0]}));body.position.y=.95;
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.32,10,8),new THREE.MeshLambertMaterial({color:SKIN[(Math.random()*4)|0]}));head.position.y=1.95;g.add(body,head);return g;}
+const SKIN=[0x5a3a24,0x6b4429,0x4a2f1d,0x7a4c2e],CLOTH=[0xce1126,0x0a6ed1,0x2e9e5b,0xf28c28,0x8b3fb5,0xffffff];
+const tmpP=new THREE.Vector3(),tmpT=new THREE.Vector3(),tmpR=new THREE.Vector3();
+function frame(s){const f=Math.min(Math.max(s/L,0),1)*(N-1),i=Math.min(Math.floor(f),N-2),k=f-i;
+  tmpP.copy(P[i]).lerp(P[i+1],k);tmpT.copy(T[i]).lerp(T[i+1],k).normalize();tmpR.set(-tmpT.z,0,tmpT.x);return{p:tmpP,t:tmpT,r:tmpR};}
+function place(o,s,x,y=0,flip=false){const f=frame(s);o.position.copy(f.p).addScaledVector(f.r,x);o.position.y=y;o.rotation.y=Math.atan2(-f.t.x,-f.t.z)+(flip?Math.PI:0);}
+
+/* ---------- Monde (reconstruit à chaque ville) ---------- */
+function buildWorld(){
+const scene=world;
+world.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(o.material.map)o.material.map.dispose();o.material.dispose();}});
+world.clear();
+const sceneRoot=world.parent;sceneRoot.background=new THREE.Color(CITY.sky);sceneRoot.fog.color.setHex(CITY.sky);
+function canvasTex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.anisotropy=4;return t;}
+const roadTex=canvasTex(256,256,(g,w,h)=>{g.fillStyle='#3a3b3f';g.fillRect(0,0,w,h);
+  for(let i=0;i<900;i++){g.fillStyle=`rgba(${Math.random()<.5?0:255},${Math.random()<.5?0:255},255,0.04)`;g.fillRect(Math.random()*w,Math.random()*h,2,2);}
+  g.fillStyle='#e9e3d0';g.fillRect(6,0,5,h);g.fillRect(w-11,0,5,h);
+  g.fillStyle='#f2c230';g.fillRect(w/2-6,0,4,h);g.fillRect(w/2+2,0,4,h);
+  g.fillStyle='#e9e3d0';g.fillRect(w/4-2,0,4,h/2);g.fillRect(3*w/4-2,0,4,h/2);});
+roadTex.wrapS=roadTex.wrapT=THREE.RepeatWrapping;
+function ribbon(x0,x1,y,mat,vScale){const pos=[],uv=[],idx=[],M=900;
+  for(let i=0;i<=M;i++){const s=i/M*L,f=frame(s);for(const [x,u] of [[x0,0],[x1,1]]){const v=f.p.clone().addScaledVector(f.r,x);pos.push(v.x,y,v.z);uv.push(u,s/vScale);}
+    if(i<M){const a=i*2;idx.push(a,a+1,a+2,a+1,a+3,a+2);}}
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.setIndex(idx);geo.computeVertexNormals();
+  const m=new THREE.Mesh(geo,mat);scene.add(m);return m;}
+ribbon(-8,8,0.02,new THREE.MeshLambertMaterial({map:roadTex}),16);
+const walk=new THREE.MeshLambertMaterial({color:0xb9a58c});
+ribbon(8,11.5,0.18,walk,10);ribbon(-11.5,-8,0.18,walk,10);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(3000,5600),new THREE.MeshLambertMaterial({color:CITY.earth}));
+const mid=P[N>>1];ground.rotation.x=-Math.PI/2;ground.position.set(mid.x,-0.05,mid.z);scene.add(ground);
+
+/* ---------- Décor (instancié) ---------- */
+const box=new THREE.BoxGeometry(1,1,1);
+const WALLS=[0xe8d6b0,0xd9a07a,0x9fc3c9,0xf0c9a0,0xc8d7a8,0xe7b3b3,0xffffff,0x7fb3e0];
+const nB=520,bMesh=new THREE.InstancedMesh(box,new THREE.MeshLambertMaterial(),nB);
+const dummy=new THREE.Object3D(),col=new THREE.Color();let bi=0;
+for(let s=10;s<L&&bi<nB-1;s+=16){for(const side of [-1,1]){if(bi>=nB)break;if(Math.random()<.18)continue;
+  const w=8+Math.random()*12,h=3+Math.random()*(Math.random()<.12?22:7),d=8+Math.random()*8;
+  place(dummy,s,side*(14+w/2+Math.random()*6),h/2);dummy.scale.set(w,h,d);dummy.updateMatrix();
+  bMesh.setMatrixAt(bi,dummy.matrix);bMesh.setColorAt(bi,col.setHex(WALLS[(Math.random()*WALLS.length)|0]));bi++;}}
+bMesh.count=bi;scene.add(bMesh);
+const nP=260,trunk=new THREE.InstancedMesh(new THREE.CylinderGeometry(.25,.35,7,6),new THREE.MeshLambertMaterial({color:0x7a5a3a}),nP);
+const leaves=new THREE.InstancedMesh(new THREE.ConeGeometry(2.6,2.2,7),new THREE.MeshLambertMaterial({color:0x3f7d3a}),nP);let pi=0;
+for(let s=30;s<L&&pi<nP;s+=30){const side=Math.random()<.5?-1:1;place(dummy,s+Math.random()*10,side*12.5,3.5);dummy.scale.set(1,1,1);dummy.updateMatrix();trunk.setMatrixAt(pi,dummy.matrix);
+  dummy.position.y=7.3;dummy.updateMatrix();leaves.setMatrixAt(pi,dummy.matrix);pi++;}
+trunk.count=leaves.count=pi;scene.add(trunk,leaves);
+
+function sign(text,sub,bg,fg,w,h){return canvasTex(512,Math.round(512*h/w),(g,W,H)=>{g.fillStyle=bg;g.fillRect(0,0,W,H);g.strokeStyle=fg;g.lineWidth=8;g.strokeRect(8,8,W-16,H-16);
+  g.fillStyle=fg;g.textAlign='center';g.font=`bold ${Math.round(H*.32)}px Bungee, Arial Black, sans-serif`;g.fillText(text,W/2,H*(sub?.5:.62),W-30);
+  if(sub){g.font=`600 ${Math.round(H*.17)}px Archivo, Arial, sans-serif`;g.fillText(sub,W/2,H*.8,W-30);}});}
+function billboard(s,side,text,sub,bg,fg){const g=new THREE.Group();
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(12,5),new THREE.MeshBasicMaterial({map:sign(text,sub,bg,fg,12,5)}));m.position.y=7;
+  const back=new THREE.Mesh(new THREE.BoxGeometry(12.4,5.4,.3),new THREE.MeshLambertMaterial({color:0x333333}));back.position.set(0,7,-.2);
+  const pole=new THREE.Mesh(new THREE.BoxGeometry(.4,5,.4),new THREE.MeshLambertMaterial({color:0x555555}));pole.position.y=2.5;
+  g.add(back,m,pole);place(g,s,side*13,0,true);g.rotation.y+=side*0.5;scene.add(g);}
+/* Emplacements sponsors : remplacer par les annonceurs payants de chaque ville */
+const SP=(CITY.sponsors||[]).concat([['TA PUB ICI','Ton enseigne vue à '+CITY.name,'#f2c230','#17191e'],['WENZE','Merch fierté africaine','#0a6ed1','#ffffff'],['SANGONEWS','L\'actu d\'Afrique chaque jour','#ce1126','#ffffff'],['TA PUB ICI','Visible par chaque joueur','#f2c230','#17191e']]);
+[.08,.33,.47,.72].forEach((u,i)=>billboard(L*u,i%2?1:-1,...SP[i]));
+
+/* ---------- Arrêts & clients ---------- */
+const zoneMat=new THREE.MeshBasicMaterial({color:0xf2c230,transparent:true,opacity:.55});
+const markerGeo=new THREE.ConeGeometry(.7,1.4,4);
+STOPS.forEach((st,i)=>{
+  const z=new THREE.Mesh(new THREE.PlaneGeometry(4,22),zoneMat);z.rotation.x=-Math.PI/2;const f=frame(st.s);z.position.copy(f.p).addScaledVector(f.r,6);z.position.y=.04;z.rotation.z=Math.atan2(-f.t.x,-f.t.z);scene.add(z);
+  const g=new THREE.Group();const panel=new THREE.Mesh(new THREE.PlaneGeometry(6,2),new THREE.MeshBasicMaterial({map:sign(st.name.toUpperCase(),'Arrêt moto-taxi','#0a6ed1','#ffffff',6,2),side:THREE.DoubleSide}));panel.position.y=4;
+  const pole=new THREE.Mesh(new THREE.BoxGeometry(.2,4,.2),new THREE.MeshLambertMaterial({color:0xdddddd}));pole.position.y=2;g.add(panel,pole);place(g,st.s-12,10.5,0,true);g.rotation.y+=0.9;scene.add(g);
+  st.waitObj=person();place(st.waitObj,st.s,9.5,.18,true);st.waitObj.rotation.y-=Math.PI/2;scene.add(st.waitObj);
+  st.mark=new THREE.Mesh(markerGeo,new THREE.MeshBasicMaterial({color:0xf2c230}));st.mark.rotation.x=Math.PI;place(st.mark,st.s,9.5,4);scene.add(st.mark);
+  st.dest=new THREE.Mesh(new THREE.CylinderGeometry(2.4,2.4,10,16,1,true),new THREE.MeshBasicMaterial({color:0x2ee06b,transparent:true,opacity:.35,side:THREE.DoubleSide}));place(st.dest,st.s,6,5);st.dest.visible=false;scene.add(st.dest);
+});
+const FINISH=new THREE.Group();{const b=new THREE.Mesh(new THREE.PlaneGeometry(18,3),new THREE.MeshBasicMaterial({map:sign('ARRIVÉE',STOPS[STOPS.length-1].name,'#ce1126','#ffffff',18,3),side:THREE.DoubleSide}));b.position.y=8;
+  const p1=new THREE.Mesh(new THREE.BoxGeometry(.6,9.5,.6),new THREE.MeshLambertMaterial({color:0xeeeeee}));p1.position.set(-9,4.7,0);const p2=p1.clone();p2.position.x=9;FINISH.add(b,p1,p2);place(FINISH,L-25,0,0,true);scene.add(FINISH);}
+computeMini();
+}
+
+/* ---------- Véhicules ---------- */
+function moto(vest,helmet){const g=new THREE.Group();const dark=new THREE.MeshLambertMaterial({color:0x1d1d22});
+  const w1=new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,.22,14),dark);w1.rotation.z=Math.PI/2;w1.position.set(0,.42,-.85);const w2=w1.clone();w2.position.z=.85;
+  const frameM=new THREE.Mesh(new THREE.BoxGeometry(.38,.45,1.7),new THREE.MeshLambertMaterial({color:0x1f4fb0}));frameM.position.y=.85;
+  const tail=new THREE.Mesh(new THREE.BoxGeometry(.3,.12,.05),new THREE.MeshBasicMaterial({color:0xff2a2a}));tail.position.set(0,.95,.87);
+  const legs=new THREE.Mesh(new THREE.BoxGeometry(.6,.5,.7),new THREE.MeshLambertMaterial({color:0x2c3550}));legs.position.set(0,1.2,.15);
+  const torso=new THREE.Mesh(new THREE.BoxGeometry(.66,.8,.42),new THREE.MeshLambertMaterial({color:vest}));torso.position.set(0,1.75,.1);torso.rotation.x=-.25;
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.3,12,10),new THREE.MeshLambertMaterial({color:helmet}));head.position.set(0,2.35,-.05);
+  g.add(w1,w2,frameM,tail,legs,torso,head);return g;}
+function car(color,len,h,stripe){const g=new THREE.Group();const b=new THREE.Mesh(new THREE.BoxGeometry(2.1,h*.55,len),new THREE.MeshLambertMaterial({color}));b.position.y=.4+h*.27;
+  const top=new THREE.Mesh(new THREE.BoxGeometry(1.9,h*.45,len*(stripe?.95:.55)),new THREE.MeshLambertMaterial({color:stripe?color:0x23303a}));top.position.y=.4+h*.55+h*.22;g.add(b,top);
+  if(stripe){const s=new THREE.Mesh(new THREE.BoxGeometry(2.14,.3,len*.96),new THREE.MeshLambertMaterial({color:stripe}));s.position.y=.4+h*.6;g.add(s);}
+  const win=new THREE.Mesh(new THREE.BoxGeometry(1.92,h*.3,len*(stripe?.9:.5)),new THREE.MeshLambertMaterial({color:0x23303a}));win.position.y=top.position.y+.05;win.scale.x=1.02;if(stripe)g.add(win);
+  return g;}
+const player=moto(0xf2e41a,0xce1126);scene.add(player);
+const passenger=person();passenger.scale.setScalar(.85);passenger.position.set(0,.55,.75);passenger.visible=false;player.add(passenger);
+
+const traffic=[];
+function spawnCar(c,ahead){c.dir=Math.random()<.6?1:-1;c.x=(c.dir>0?1:-1)*(Math.random()<.5?2:6);
+  c.v=c.dir>0?10+Math.random()*14:18+Math.random()*14;c.s=S.s+ahead+Math.random()*260;place(c.mesh,c.s,c.x,0,c.dir<0);}
+const KINDS=[()=>({mesh:car(CITY.taxi,4.2,1.6),len:4.2}),()=>({mesh:car(CITY.taxi,4.2,1.6),len:4.2}),()=>({mesh:car(CITY.bus[0],6.5,2.6,CITY.bus[1]),len:6.5}),()=>({mesh:car(0xcfd3d6,4.4,1.7),len:4.4}),()=>({mesh:moto(0xf2e41a,0x222222),len:2})];
+
+/* ---------- État ---------- */
+const S={s:0,x:4,v:0,steer:0,fc:0,clients:0,t:0,carrying:null,running:false,crashCool:0,shake:0};
+const keys={};let touch={l:0,r:0,g:0,b:0};
+function buildTraffic(){traffic.forEach(c=>scene.remove(c.mesh));traffic.length=0;
+  for(let i=0;i<22;i++){const k=KINDS[i%KINDS.length]();const c={mesh:k.mesh,len:k.len};scene.add(c.mesh);traffic.push(c);}}
+function setCity(key){CKEY=key;CITY=CITIES[key];loadRoute(CITY);buildWorld();buildTraffic();reset();
+  document.querySelectorAll('.city').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===key));
+  const first=STOPS[0].name,lastS=STOPS[STOPS.length-1].name;
+  $('kick').textContent=CITY.moto+' · '+CITY.name+', '+CITY.country;
+  $('intro').textContent='De '+first+' à '+lastS+'. Ralentis à l’arrêt pour prendre un client, dépose-le au bon arrêt et encaisse tes '+CITY.cur+'. Évite les taxis et les bus.';
+  $('endKick').textContent='Arrivée · '+lastS;showBest();
+  camPos.copy(frame(30).p).add(new THREE.Vector3(14,9,16));camLook.copy(frame(60).p);
+  try{localStorage.setItem('mm_city',key);}catch(e){}}
+
+function reset(){Object.assign(S,{s:12,x:4,v:0,steer:0,fc:0,clients:0,t:0,carrying:null,crashCool:0,shake:0});
+  STOPS.forEach((st,i)=>{st.waiting=i>0&&i<STOPS.length-1?true:i===0;st.waitObj.visible=st.mark.visible=st.waiting;st.dest.visible=false;});
+  traffic.forEach((c,i)=>spawnCar(c,40+i*14));passenger.visible=false;}
+
+/* ---------- Entrées ---------- */
+addEventListener('keydown',e=>{keys[e.key]=1;if(e.key.startsWith('Arrow'))e.preventDefault();});
+addEventListener('keyup',e=>{keys[e.key]=0;});
+function hold(id,k){const b=$(id);const on=e=>{e.preventDefault();touch[k]=1;b.classList.add('on');audioInit();},off=e=>{touch[k]=0;b.classList.remove('on');};
+  b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointerleave',off);b.addEventListener('pointercancel',off);}
+hold('bL','l');hold('bR','r');hold('bG','g');hold('bB','b');
+
+/* ---------- Son ---------- */
+let ac,osc,gain;
+function audioInit(){if(ac)return;try{ac=new (window.AudioContext||window.webkitAudioContext)();osc=ac.createOscillator();osc.type='sawtooth';gain=ac.createGain();gain.gain.value=0;
+  const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=600;osc.connect(f);f.connect(gain);gain.connect(ac.destination);osc.start();}catch(e){ac=null;}}
+function beep(freqs){if(!ac)return;freqs.forEach((fq,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.type='square';o.frequency.value=fq;g.gain.setValueAtTime(.08,ac.currentTime+i*.09);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+i*.09+.12);o.connect(g);g.connect(ac.destination);o.start(ac.currentTime+i*.09);o.stop(ac.currentTime+i*.09+.14);});}
+
+/* ---------- HUD ---------- */
+let toastT=0;function toast(t){const el=$('toast');el.textContent=t;el.style.opacity=1;toastT=1.6;}
+const fmt=t=>{const m=Math.floor(t/60),s=Math.floor(t%60);return m+':'+String(s).padStart(2,'0');};
+const fcFmt=n=>n.toLocaleString('fr-FR')+' '+CITY.cur;
+const money=n=>Math.max(10,Math.round(n*CITY.rate/10)*10);
+function streetAt(s){let n=STREETS[0][1],k=1;STREETS.forEach(([u,name],i)=>{if(s/L>=u){n=name;k=i+1;}});return[n,k];}
+function nextWaiting(){return STOPS.find(st=>st.waiting&&st.s>S.s-10);}
+const mini=$('mini'),mg=mini.getContext('2d');
+let minX,maxX,minZ,maxZ,sc;
+function computeMini(){minX=minZ=1e9;maxX=maxZ=-1e9;P.forEach(p=>{minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x);minZ=Math.min(minZ,p.z);maxZ=Math.max(maxZ,p.z);});sc=180/Math.max(maxX-minX,maxZ-minZ);}const mp=p=>[20+(p.x-minX)*sc+(180-(maxX-minX)*sc)/2,20+(p.z-minZ)*sc];
+function drawMini(){mg.clearRect(0,0,220,220);mg.strokeStyle='#f6f1e4';mg.lineWidth=5;mg.beginPath();P.forEach((p,i)=>{if(i%8)return;const[a,b]=mp(p);i?mg.lineTo(a,b):mg.moveTo(a,b);});mg.stroke();
+  STOPS.forEach(st=>{const[a,b]=mp(frame(st.s).p);if(st.waiting){mg.fillStyle='#f2c230';mg.fillRect(a-6,b-6,12,12);}if(st.dest.visible){mg.fillStyle='#2ee06b';mg.beginPath();mg.arc(a,b,10,0,7);mg.fill();}});
+  const[a,b]=mp(frame(S.s).p);mg.fillStyle='#ce1126';mg.beginPath();mg.arc(a,b,9,0,7);mg.fill();mg.strokeStyle='#fff';mg.lineWidth=3;mg.stroke();}
+
+/* ---------- Boucle ---------- */
+const MAXV=40;let last=performance.now(),camPos=new THREE.Vector3(),camLook=new THREE.Vector3();
+function step(dt){
+  const gas=keys.ArrowUp||keys.w||keys.z||touch.g, brk=keys.ArrowDown||keys.s||touch.b;
+  const st=(keys.ArrowRight||keys.d||touch.r?1:0)-(keys.ArrowLeft||keys.a||keys.q||touch.l?1:0);
+  S.v+=(gas?17:0)*dt-(brk?42:0)*dt-(S.v*0.06+1)*dt*(gas?0.2:1);S.v=Math.max(0,Math.min(MAXV,S.v));
+  S.steer+=(st-S.steer)*Math.min(1,dt*8);S.x+=S.steer*dt*(4+S.v*0.22);S.x=Math.max(-7.4,Math.min(7.4,S.x));
+  S.s+=S.v*dt;S.t+=dt;if(S.crashCool>0)S.crashCool-=dt;
+  // trafic
+  for(const c of traffic){c.s+=c.v*c.dir*dt;
+    if(c.s<S.s-50||c.s>S.s+520)spawnCar(c,200);
+    // collision
+    if(S.crashCool<=0&&Math.abs(c.s-S.s)<c.len/2+.9&&Math.abs(c.x-S.x)<(c.len<3?.9:1.7)){S.crashCool=1.5;S.v*=.15;S.shake=.5;const pen=money(300);S.fc=Math.max(0,S.fc-pen);toast('Aïe ! −'+fcFmt(pen));beep([180,120]);
+      if(S.carrying){toast('Client perdu ! −'+fcFmt(pen));S.carrying.dest.visible=false;S.carrying=null;passenger.visible=false;}}
+    place(c.mesh,c.s,c.x,0,c.dir<0);}
+  // arrêts
+  let hint='';
+  for(const stp of STOPS){const near=Math.abs(stp.s-S.s)<12&&S.x>3.2;
+    if(!S.carrying&&stp.waiting&&near){if(S.v<9){stp.waiting=false;stp.waitObj.visible=stp.mark.visible=false;
+        const idx=STOPS.indexOf(stp),cands=STOPS.filter((d,j)=>j>idx&&j<=idx+3);const d=cands[(Math.random()*cands.length)|0]||STOPS[STOPS.length-1];
+        S.carrying={dest:d,from:stp.s,pick:S.t};d.dest.visible=true;passenger.visible=true;toast('Client à bord !');beep([520,780]);}
+      else hint='Ralentis pour prendre le client';}
+    if(S.carrying&&S.carrying.dest===stp&&near){if(S.v<9){const dist=stp.s-S.carrying.from,dur=S.t-S.carrying.pick;
+        const fare=money(300+dist*0.9+Math.max(0,dist/22-dur)*40);S.fc+=fare;S.clients++;stp.dest.visible=false;S.carrying=null;passenger.visible=false;toast('+'+fcFmt(fare));beep([660,880,1320]);}
+      else hint='Ralentis pour déposer le client';}}
+  // mission
+  let m;if(S.carrying)m='Dépose ton client à : '+S.carrying.dest.name+' ('+Math.max(0,Math.round(S.carrying.dest.s-S.s))+' m)';
+  else{const n=nextWaiting();m=n?'Client qui attend : '+n.name+' ('+Math.max(0,Math.round(n.s-S.s))+' m). Voie de droite.':'Fonce vers '+STOPS[STOPS.length-1].name+' !';}
+  $('mission').textContent=hint||m;$('mission').style.borderLeftColor=hint?'#ce1126':'#f2c230';
+  if(S.s>=L-25)finish();
+}
+function render(dt){
+  place(player,S.s,S.x,0);player.rotation.z=-S.steer*0.32;player.rotateY(-S.steer*0.15);
+  const f=frame(S.s);const target=f.p.clone().addScaledVector(f.r,S.x*.6);
+  const back=target.clone().addScaledVector(f.t,-9.5);back.y=4.6;const look=target.clone().addScaledVector(f.t,14);look.y=1.6;
+  camPos.lerp(back,Math.min(1,dt*5));camLook.lerp(look,Math.min(1,dt*6));
+  camera.position.copy(camPos);if(S.shake>0){S.shake-=dt;camera.position.x+=(Math.random()-.5)*S.shake;camera.position.y+=(Math.random()-.5)*S.shake;}
+  camera.lookAt(camLook);
+  const tt=performance.now()/400;STOPS.forEach(st=>{if(st.mark.visible)st.mark.position.y=4+Math.sin(tt)*.4;});
+  renderer.render(scene,camera);
+}
+function hud(){$('fc').textContent=fcFmt(S.fc);$('clients').textContent=S.clients+(S.clients>1?' clients':' client');$('time').textContent=fmt(S.t);
+  const[n,k]=streetAt(S.s);$('street').innerHTML=n+'<small>Tronçon '+k+' / '+STREETS.length+' · Arrivée '+(Math.max(0,(L-S.s)/1000)).toFixed(1)+' km</small>';
+  $('speed').innerHTML=Math.round(S.v*2.5)+'<small>KM/H</small>';drawMini();}
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
+  if(S.running){step(dt);hud();}
+  if(toastT>0){toastT-=dt;if(toastT<=0)$('toast').style.opacity=0;}
+  if(gain)gain.gain.value=S.running?.025+S.v/MAXV*.03:0;if(osc)osc.frequency.value=55+S.v*3.2;
+  render(dt);requestAnimationFrame(loop);}
+
+/* ---------- Écrans ---------- */
+const ui=['hud','mission','mini','speed','padL','padR'];
+function getBest(){try{return JSON.parse(localStorage.getItem('mm_best_'+CKEY)||'null');}catch(e){return null;}}
+function showBest(){const b=getBest();$('best').textContent=b?'Record : '+fcFmt(b.fc)+' en '+fmt(b.t):'';}
+function start(){audioInit();reset();camPos.copy(frame(0).p).add(new THREE.Vector3(0,5,10));S.running=true;$('start').hidden=$('end').hidden=true;ui.forEach(i=>$(i).hidden=false);toast('Yaka ! Go !');}
+let lastMsg='';
+function finish(){S.running=false;S.v=0;ui.forEach(i=>$(i).hidden=true);
+  const b=getBest();const rec=!b||S.fc>b.fc||(S.fc===b.fc&&S.t<b.t);if(rec){try{localStorage.setItem('mm_best_'+CKEY,JSON.stringify({fc:S.fc,t:S.t}));}catch(e){}}
+  $('eFc').textContent=S.fc.toLocaleString('fr-FR');$('eCl').textContent=S.clients;$('eT').textContent=fmt(S.t);
+  $('eMsg').textContent=rec?'Nouveau record personnel. Lance le défi à tes amis.':'Record à battre : '+fcFmt(b.fc)+' en '+fmt(b.t)+'.';
+  lastMsg='🏍️ Moto Mboka '+CITY.name+' : '+fcFmt(S.fc)+', '+S.clients+' clients en '+fmt(S.t)+', de '+STOPS[0].name+' à '+STOPS[STOPS.length-1].name+'. Tu fais mieux ? #MotoMboka';
+  $('end').hidden=false;$('share').textContent='Copier mon score';showBest();}
+$('play').onclick=start;$('again').onclick=start;
+$('share').onclick=()=>{const b=$('share');const done=()=>b.textContent='Score copié';
+  if(navigator.clipboard)navigator.clipboard.writeText(lastMsg).then(done,()=>{$('eMsg').textContent=lastMsg;b.textContent='Sélectionne le texte';});else{$('eMsg').textContent=lastMsg;}};
+const cityBox=$('cities');Object.entries(CITIES).forEach(([k,c])=>{const b=document.createElement('button');b.className='city';b.dataset.k=k;b.textContent=c.name;b.onclick=()=>setCity(k);cityBox.appendChild(b);});
+let saved='kinshasa';try{const v=localStorage.getItem('mm_city');if(v&&CITIES[v])saved=v;}catch(e){}
+setCity(saved);
+requestAnimationFrame(loop);
+})();
+</script>
