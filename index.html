@@ -106,6 +106,27 @@ h1 span{color:var(--taxi);display:block}
 #mini{bottom:calc(178px + env(safe-area-inset-bottom,0px))!important}
 #radio{bottom:calc(282px + env(safe-area-inset-bottom,0px))!important}
 #speed{bottom:calc(180px + env(safe-area-inset-bottom,0px))!important}
+/* ---- Téléphone en paysage : HUD compact, route dégagée ---- */
+@media (max-height:520px) and (orientation:landscape){
+  .hud{padding-top:calc(6px + env(safe-area-inset-top,0px))}
+  .plate{padding:3px 8px;box-shadow:2px 2px 0 var(--rouge)}
+  .plate b{font-size:15px}.plate small{font-size:9px}
+  .street{font-size:11px;padding:2px 10px}.street small{font-size:9px}
+  #target{top:calc(52px + env(safe-area-inset-top,0px));bottom:auto!important;width:min(46vw,380px);padding:4px 8px 7px;gap:8px;border-width:2px}
+  #target #tIcon{width:28px;height:28px;font-size:16px}
+  #target b{font-size:14px}#target small{font-size:9px}#target i{font-size:9px}
+  #target strong{font-size:20px}
+  #target.near{animation:none;box-shadow:0 0 0 3px var(--c)}
+  #mission{top:auto;bottom:calc(16px + env(safe-area-inset-bottom,0px));font-size:12px;padding:4px 10px}
+  #mini{width:72px!important;height:72px!important;bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
+  #radio{top:calc(46px + env(safe-area-inset-top,0px));bottom:auto!important;font-size:10px;padding:3px 8px;max-width:30vw}
+  #speed{bottom:calc(86px + env(safe-area-inset-bottom,0px))!important;font-size:24px;background:rgba(23,25,30,.7);padding:2px 8px}
+  #speed small{font-size:9px}
+  .pad button{width:54px;height:54px;font-size:18px}.pad button.gas{width:64px;height:64px}
+  .pad{bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+  #toast{top:30%;font-size:clamp(22px,5vw,38px)}
+}
+
 
 #radio{position:fixed;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(200px + env(safe-area-inset-bottom,0px));max-width:min(60vw,260px);background:rgba(23,25,30,.85);color:var(--ink);border:2px solid var(--taxi);font-family:var(--body);font-weight:700;font-size:12px;padding:6px 10px;cursor:pointer;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #radio:focus-visible{outline:3px solid var(--rdc)}
@@ -184,7 +205,7 @@ sun.shadow.mapSize.set(MOBILE?512:1024,MOBILE?512:1024);
 Object.assign(sun.shadow.camera,{left:-45,right:45,top:45,bottom:-45,near:1,far:300});sun.shadow.bias=-0.0006;sun.shadow.normalBias=0.04;
 scene.add(sun,sun.target);
 const SUNDIR=new THREE.Vector3(-0.55,0.42,-0.72).normalize();
-function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<h?76:60;camera.updateProjectionMatrix();}
+function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<h?76:(h<520?56:60);camera.updateProjectionMatrix();}
 addEventListener('resize',resize);resize();
 
 /* ---------- Ciel ---------- */
@@ -655,10 +676,10 @@ function render(dt){
   place(player,S.s,S.x,0);const latN=S.vx/(2.5+S.v*.2+.01);player.rotation.y+=-Math.atan2(S.vx,Math.max(S.v,3))*.9;player.rotation.z=-latN*.32*Math.min(1,S.v/6);player.rotation.x=0;
   player.userData.wheels.forEach(w=>w.rotation.x-=S.v*dt/.31);player.position.y=Math.abs(Math.sin(performance.now()/90))*.01*Math.min(1,S.v/5);
   const f=frame(S.s);const target=f.p.clone().addScaledVector(f.r,S.x*.75+.8);
-  const back=target.clone().addScaledVector(f.t,-7.5-S.v*.08);back.y=3.3+S.v*.03;const look=target.clone().addScaledVector(f.t,24);look.y=1.4;
+  const LAND=innerHeight<520&&innerWidth>innerHeight;const back=target.clone().addScaledVector(f.t,(LAND?-9:-7.5)-S.v*.08);back.y=(LAND?4.2:3.3)+S.v*.03;const look=target.clone().addScaledVector(f.t,24);look.y=1.4;
   camPos.lerp(back,Math.min(1,dt*5));camLook.lerp(look,Math.min(1,dt*6));
   camera.position.copy(camPos);if(S.shake>0){S.shake-=dt;camera.position.x+=(Math.random()-.5)*S.shake;camera.position.y+=(Math.random()-.5)*S.shake;}
-  camera.lookAt(camLook);const baseF=innerWidth<innerHeight?76:60;camera.fov+=((baseF+S.v*.25)-camera.fov)*Math.min(1,dt*3);camera.updateProjectionMatrix();
+  camera.lookAt(camLook);const baseF=innerWidth<innerHeight?76:(innerHeight<520?56:60);camera.fov+=((baseF+S.v*.25)-camera.fov)*Math.min(1,dt*3);camera.updateProjectionMatrix();
   sun.target.position.copy(player.position);sun.position.copy(player.position).addScaledVector(SUNDIR,180);sky.position.copy(camera.position);
   const tt=performance.now()/300;STOPS.forEach(st=>{for(const b of [st.mark,st.dest]){if(!b||!b.visible)continue;b.userData.arrow.position.y=9+Math.sin(tt)*1.2;b.userData.arrow.rotation.y+=dt*2;const k=1+.25*Math.sin(tt*1.5);b.userData.ring.scale.set(k,1,k);}});
   if(TGT.st){const p=worldAt(TGT.st.s,TGT.st===(S.carrying&&S.carrying.dest)?ROAD_H-1.9:WALK0+.9);label.position.set(p.x,15.5+Math.sin(tt)*1.2,p.z);label.visible=true;}else label.visible=false;
