@@ -710,8 +710,8 @@ const CV={pres:{n:'CORTÈGE PRÉSIDENTIEL',pen:1200,bonus:250,col:0x0b0b0b,motos
 const GRADES=[[0,'Wewa débutant'],[300,'Chauffeur de Kin'],[1200,'Roi du Boulevard'],[3000,'Mokonzi ya ba Wewa']];
 const VESTS=[['Jaune wewa',0xf2e41a,0],['Orange',0xf28c28,0],['Gilet Wenze',0x17191e,0],['Vert',0x2e9e5b,1],['Bleu RDC',0x0a6ed1,1],['Rouge',0xce1126,2],['Or Mokonzi',0xd4a017,3]];
 const BIKES=[['Rouge',0xb01f1f,0],['Noir',0x202020,0],['Bleu',0x1f4fb0,1],['Vert',0x1f7a3a,1],['Chrome',0xc0c0c0,2],['Or',0xd4a017,3]];
-const DAILY=[{t:'Transporte 2 sapeurs',k:'sap',n:2},{t:'Ramasse 15 mikate',k:'mik',n:15},{t:'Termine la course sans accident',k:'clean',n:1},
-  {t:'Cède le passage à 2 cortèges',k:'conv',n:2},{t:'Dépose 5 clients',k:'cl',n:5},{t:'Gagne 4 000 FC',k:'fc',n:4000},{t:'Ramasse 3 bonus Atalaku ou Pili-pili',k:'pw',n:3}];
+const DAILY=[{t:'Transporte 2 sapeurs',k:'sap',n:2},{t:'Ramasse 6 mikate',k:'mik',n:6},{t:'Termine la course sans accident',k:'clean',n:1},
+  {t:'Cède le passage à 2 cortèges',k:'conv',n:2},{t:'Dépose 5 clients',k:'cl',n:5},{t:'Gagne 4 000 FC',k:'fc',n:4000},{t:'Ramasse un bonus Atalaku ou Pili-pili',k:'pw',n:1}];
 const TODAY=new Date().toISOString().slice(0,10), DI=[...TODAY].reduce((a,c)=>a+c.charCodeAt(0),0)%DAILY.length;
 const WEEK=(()=>{const d=new Date(),j=new Date(d.getFullYear(),0,1);return d.getFullYear()+'-'+Math.ceil(((d-j)/864e5+j.getDay()+1)/7);})();
 let PROF={xp:0,runs:0,vest:0,bike:0,daily:''};try{Object.assign(PROF,JSON.parse(localStorage.getItem('mm_profile')||'{}'));}catch(e){}
@@ -743,9 +743,9 @@ const NAVY=new THREE.Color(0x070b1c),GREY=new THREE.Color(0x6a7280),tmpC=new THR
 
 function addItem(k,s,x){const sp=new THREE.Sprite(PUM[k]);sp.scale.set(2.7,2.7,1);const p=worldAt(s,x);sp.position.set(p.x,1.8,p.z);sp.renderOrder=5;world.add(sp);FX.items.push({k,s,x,sp,taken:false,ph:Math.random()*6});}
 function fxBuild(){FX.items.length=0;let s=80,lastFuel=0;const W=['mikate','mikate','mikate','tanga','pili','malewa','atalaku','mikate','tanga'];
-  while(s<L-70){let k=s-lastFuel>520?'fuel':pick(W);if(k==='fuel')lastFuel=s;
+  while(s<L-70){let k=s-lastFuel>1300?'fuel':pick(W);if(k==='fuel')lastFuel=s;
     if(k==='mikate'){const x=pick(LANES_R);for(let j=0;j<3;j++)addItem('mikate',s+j*4.5,x);}else addItem(k,s,pick(LANES_R));
-    s+=rnd(150,240);}
+    s+=rnd(450,720);}
   FX.jams=[];const nJ=L>2500?2:1;for(let i=0;i<nJ;i++){const s0=L*(.3+i*.38)+rnd(-60,60);FX.jams.push({s0,s1:s0+rnd(200,280)});}}
 const fxJam=s=>FX.jams.some(z=>s>z.s0&&s<z.s1);
 function stadiumStop(idx){const lm=CITY.landmarks||{};const k=lm.martyrs||lm.tata;if(!k)return null;const ss=toU(k[0])*L;let best=null;
@@ -755,8 +755,8 @@ function fxReset(){FX.items.forEach(it=>{it.taken=false;it.sp.visible=true;});FX
   Object.assign(S,{fuel:100,crashes:0,convOk:0,sap:0,mik:0,rep:0,pw:0});FX.jams.forEach(z=>{z.on=z.done=z.hit=false;});
   STOPS.forEach((st,i)=>{let t='normal';if(i>0&&i<STOPS.length-1){const r=Math.random();t=r<.17?'sapeur':r<.32?'maman':(r<.46&&stadiumStop(i))?'supporter':'normal';}
     st.ctype=t;if(st.mark)recolorBeacon(st.mark,CT[t].col);});
-  FX.evs=[];const ks=['dig','dig','min','min','gen','pres'];[.16,.47,.78].forEach(f=>FX.evs.push({s:L*f+rnd(-80,80),type:'convoy',kind:pick(ks)}));
-  if(!FX.evs.some(e=>e.kind==='pres')&&Math.random()<.5)FX.evs[1].kind='pres';
+  FX.evs=[];const ks=['dig','dig','min','min','gen','pres'];[.28,.68].forEach(f=>FX.evs.push({s:L*f+rnd(-80,80),type:'convoy',kind:pick(ks)}));
+  if(!FX.evs.some(e=>e.kind==='pres')&&Math.random()<.4)FX.evs[1].kind='pres';
   if(Math.random()<.5)FX.evs.push({s:L*rnd(.2,.6),type:'rain',dur:rnd(35,50)});
   if(Math.random()<.4)FX.evs.push({s:L*rnd(.35,.75),type:'night',dur:rnd(40,55)});
   if(FX.convoy)endConvoy();FX.rainK=FX.nightK=0;fxEnv();applyGarage();}
@@ -798,7 +798,7 @@ function fxAudio(){if(!ac||sirO)return;sirO=ac.createOscillator();sirO.type='saw
   const ns=ac.createBufferSource();ns.buffer=nb;ns.loop=true;const bp=ac.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1400;bp.Q.value=.6;rainG=ac.createGain();rainG.gain.value=0;ns.connect(bp);bp.connect(rainG);rainG.connect(ac.destination);ns.start();}
 function fxStep(dt){FX.hint='';fxAudio();
   for(const k in FX.eff)if(FX.eff[k]>0)FX.eff[k]-=dt;if(FX.comboT>0)FX.comboT-=dt;
-  S.fuel=Math.max(0,S.fuel-Math.abs(S.v)*dt/22*(FX.eff.hyper>0?1.4:1));
+  S.fuel=Math.max(0,S.fuel-Math.abs(S.v)*dt/40*(FX.eff.hyper>0?1.4:1));
   if(S.fuel<=0)FX.hint='⛽ Panne sèche ! Ramasse un bidon KADHAFI (bleu)';else if(S.fuel<20)FX.hint='⛽ Réservoir presque vide : cherche un bidon KADHAFI';
   for(const it of FX.items)if(!it.taken&&Math.abs(it.s-S.s)<2.6&&Math.abs(it.x-S.x)<1.8)takeItem(it);
   for(const z of FX.jams){if(!z.on&&!z.done&&S.s>z.s0-60&&S.s<z.s1){z.on=true;toast('🚕🚌 EMBOUTEILLAGE ! Faufile-toi');let j=0;
