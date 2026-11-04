@@ -2,7 +2,7 @@
 <title>Moto Mboka</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Archivo:wght@400;600;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Anton&family=Archivo:wght@400;600;800&display=swap">
 <style>
 /* Layout: plein écran 3D, HUD en bandeaux d'enseigne peinte, commandes tactiles aux coins */
 :root{
@@ -55,6 +55,42 @@ h1 span{color:var(--taxi);display:block}
 .city:focus-visible{outline:3px solid var(--taxi);outline-offset:2px}
 #cities,#routes{gap:8px}
 @media (prefers-reduced-motion:reduce){#toast{transition:none}}
+
+/* ---- Accueil « affiche de ville » ---- */
+.home{place-items:stretch;background:linear-gradient(90deg,rgba(12,10,14,.92) 0%,rgba(12,10,14,.72) 38%,rgba(12,10,14,.08) 72%,rgba(12,10,14,0) 100%);overflow-y:auto}
+.home .letterbox{position:fixed;left:0;right:0;height:5vh;background:#000;z-index:0;pointer-events:none}
+.home .letterbox.top{top:0}.home .letterbox.bot{bottom:0}
+.home .grain{position:fixed;inset:0;pointer-events:none;opacity:.12;mix-blend-mode:overlay;background-image:var(--grain);z-index:0}
+.home::after{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 70% 45%,transparent 45%,rgba(0,0,0,.55) 100%)}
+.hero{position:relative;z-index:1;max-width:560px;display:grid;gap:16px;align-content:center;padding-block:calc(7vh + 8px) calc(7vh + 8px);min-height:100%}
+.brand{display:grid;gap:14px}.brand .kicker{position:relative;z-index:2}
+.logo{padding-top:18px;font-family:"Anton",Impact,"Arial Narrow",sans-serif;font-weight:400;margin:0;line-height:.86;transform:skewY(-4deg) rotate(-2deg);transform-origin:left;display:grid;letter-spacing:.01em}
+.logo span{display:block;-webkit-text-stroke:3px #0d0b0f;paint-order:stroke fill;text-shadow:6px 6px 0 #ce1126,0 0 30px rgba(0,0,0,.6)}
+.logo .l1{font-size:clamp(56px,15vw,112px);color:#f6f1e4}
+.logo .l2{text-shadow:none;font-size:clamp(70px,19vw,148px);background:linear-gradient(180deg,#ffe36b 0%,#f2c230 55%,#e08a1e 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:3px #0d0b0f;filter:drop-shadow(6px 6px 0 #0a6ed1)}
+.tag{margin:0;font-size:clamp(15px,3.8vw,18px);font-weight:600;max-width:40ch;border-left:4px solid #f2c230;padding-left:10px}
+.pick{display:grid;gap:8px}
+.pickt{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:#f2c230}
+#routes{display:grid;gap:8px}
+#routes button{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;text-align:left;background:rgba(246,241,228,.07);border:2px solid rgba(246,241,228,.35);color:#f6f1e4;padding:10px 12px;cursor:pointer;font-family:var(--body);transform:skewX(-6deg);transition:transform .15s,background .15s,border-color .15s}
+#routes button>*{transform:skewX(6deg)}
+#routes button b{font-family:"Anton",Impact,sans-serif;font-weight:400;font-size:28px;color:#f2c230;line-height:1}
+#routes button span{font-weight:800;font-size:15px;line-height:1.2}
+#routes button span small{display:block;font-weight:600;font-size:12px;opacity:.75;margin-top:2px}
+#routes button i{font-style:normal;font-family:var(--display);font-size:13px;opacity:.85;white-space:nowrap}
+#routes button:hover{background:rgba(246,241,228,.14);transform:skewX(-6deg) translateX(4px)}
+#routes button[aria-pressed="true"]{background:#f2c230;border-color:#f2c230;color:#17191e}
+#routes button[aria-pressed="true"] b{color:#ce1126}
+#routes button:focus-visible{outline:3px solid #0a6ed1;outline-offset:3px}
+.home #intro{font-size:14px;opacity:.85;margin:0}
+.go{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.cta.big{font-family:"Anton",Impact,sans-serif;font-weight:400;font-size:30px;letter-spacing:.04em;padding:12px 34px;transform:skewX(-8deg);box-shadow:6px 6px 0 #ce1126}
+.cta.big:hover{filter:brightness(1.08)}
+.cta.big:disabled{opacity:.7}
+.home .keys{font-size:12px;opacity:.7;margin:0}
+.credits{font-size:11px;opacity:.6;margin:0}
+@media (max-width:700px){.home{background:linear-gradient(180deg,rgba(12,10,14,.25) 0%,rgba(12,10,14,.75) 40%,rgba(12,10,14,.92) 100%)}.hero{align-content:end}}
+
 #target{--c:#f2c230;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;width:min(92vw,520px);background:rgba(23,25,30,.9);border:3px solid var(--c);padding:8px 12px 12px;pointer-events:none;box-shadow:0 0 18px color-mix(in srgb,var(--c) 45%,transparent)}
 #target #tIcon{font-size:26px;width:44px;height:44px;display:grid;place-items:center;background:var(--c);color:#17191e;border-radius:50%}
 #target div{min-width:0;display:grid}
@@ -91,15 +127,23 @@ h1 span{color:var(--taxi);display:block}
 <div class="pad l" id="padL" hidden><button id="bL" aria-label="Gauche">◀</button><button id="bR" aria-label="Droite">▶</button></div>
 <div class="pad r" id="padR" hidden><button id="bB" class="brk" aria-label="Freiner">■</button><button id="bG" class="gas" aria-label="Accélérer">▲</button></div>
 
-<div class="screen" id="start">
-  <div class="card">
-    <span class="kicker" id="kick">wewa · Kinshasa</span>
-    <h1>Moto <span>Mboka</span></h1>
-    <div class="row" id="cities" role="group" aria-label="Choisis ta ville"></div>
-    <div class="row" id="routes" role="group" aria-label="Choisis ton circuit" hidden></div>
+<div class="screen home" id="start">
+  <div class="letterbox top"></div><div class="letterbox bot"></div><div class="grain"></div>
+  <div class="hero">
+    <div class="brand">
+      <span class="kicker" id="kick">Kinshasa · RDC</span>
+      <h1 class="logo"><span class="l1">MOTO</span><span class="l2">MBOKA</span></h1>
+      <p class="tag">Kin la belle. Prends tes clients, tiens ta route, encaisse tes francs.</p>
+    </div>
+    <div class="row" id="cities" role="group" aria-label="Choisis ta ville" hidden></div>
+    <div class="pick">
+      <span class="pickt">Choisis ton circuit</span>
+      <div id="routes" role="group" aria-label="Choisis ton circuit"></div>
+    </div>
     <p id="intro"></p>
+    <div class="go"><button class="cta big" id="play">Démarrer</button><span class="fine" id="best"></span></div>
     <p class="keys">Clavier : <kbd>↑</kbd> gaz · <kbd>↓</kbd> frein · <kbd>←</kbd><kbd>→</kbd> direction. Mobile : boutons à l'écran.</p>
-    <div class="row"><button class="cta" id="play">Démarrer</button><span class="fine" id="best"></span></div>
+    <p class="credits">Rues réelles © contributeurs OpenStreetMap · Avec <b>SangoNews</b> · <b>Wenze</b></p>
   </div>
 </div>
 
@@ -635,7 +679,11 @@ function hud(){$('fc').textContent=fcFmt(S.fc);$('clients').textContent=S.client
 let intro=0,hudT=0;
 function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
   if(S.running){step(dt);hudT-=dt;if(hudT<=0){hudT=.16;hud();}}
-  else{intro+=dt*.06;if(CITY.introC){const c=CITY.introC;camPos.set(c.x+Math.cos(intro)*150,55,c.z+Math.sin(intro)*150);camLook.set(c.x,75,c.z);}else{const f=frame(60);const c=f.p.clone();camPos.set(c.x+Math.cos(intro)*60,28,c.z+Math.sin(intro)*60);camLook.copy(worldAt(120,0)).setY(20);}}
+  else{intro+=dt;const shot=Math.floor(intro/9)%3,u=(intro%9)/9;const n=STOPS.length;
+    if(shot===0){const s0=L*((Math.floor(intro/27)*0.37)%0.85)+30+u*160;const f=frame(s0);camPos.copy(f.p).addScaledVector(f.r,-6+u*4).setY(5+u*3);camLook.copy(worldAt(s0+60,6)).setY(4);S.s=s0;}
+    else if(shot===1&&CITY.introC){const c=CITY.introC,a=u*1.6+intro*.01;camPos.set(c.x+Math.cos(a)*170,40+u*30,c.z+Math.sin(a)*170);camLook.set(c.x,80,c.z);S.s=12;}
+    else{const s0=L*(0.55+0.3*u);const f=frame(s0);camPos.copy(f.p).addScaledVector(f.r,60).setY(90-u*30);camLook.copy(worldAt(s0+220,0)).setY(10);S.s=s0;}
+    for(const c of traffic){c.v=c.v0||c.v;c.s+=c.v*c.dir*dt;if(c.s<S.s-80||c.s>S.s+600)spawnCar(c,60);place(c.mesh,c.s,c.x,0,c.dir<0);if(c.mesh.userData.wheels)c.mesh.userData.wheels.forEach(w=>w.rotation.x-=c.v*dt/.33);}}
   if(toastT>0){toastT-=dt;if(toastT<=0)$('toast').style.opacity=0;}
   if(gain)gain.gain.value=S.running?(radio.paused?1:.5)*(.022+S.v/MAXV*.03):0;if(osc)osc.frequency.value=55+S.v*3.2;
   if(!S.running){camera.position.copy(camPos);camera.lookAt(camLook);sun.target.position.copy(camLook);sun.position.copy(camLook).addScaledVector(SUNDIR,180);sky.position.copy(camera.position);renderer.render(scene,camera);}
@@ -672,15 +720,18 @@ $('share').onclick=()=>{const b=$('share');const done=()=>b.textContent='Score c
   if(navigator.clipboard)navigator.clipboard.writeText(lastMsg).then(done,()=>{$('eMsg').textContent=lastMsg;b.textContent='Sélectionne le texte';});else{$('eMsg').textContent=lastMsg;}};
 let RI=0;
 function setCity(key,ri){RI=ri||0;const base=CITIES[key];CKEY=key+(base.routes?'_'+RI:'');CITY=Object.assign({},base,base.routes?base.routes[RI]:{});loadRoute(CITY);
-  const rb=$('routes');rb.innerHTML='';rb.hidden=!base.routes;(base.routes||[]).forEach((r,i)=>{const b=document.createElement('button');b.className='city';b.textContent=r.rname;b.setAttribute('aria-pressed',i===RI);b.onclick=()=>setCity(key,i);rb.appendChild(b);});buildWorld();buildTraffic();reset();
+  const rb=$('routes');rb.innerHTML='';rb.hidden=!base.routes;(base.routes||[]).forEach((r,i)=>{const R_=Object.assign({},base,r);let km=0;for(let j=1;j<R_.wp.length;j++)km+=Math.hypot(R_.wp[j][0]-R_.wp[j-1][0],R_.wp[j][1]-R_.wp[j-1][1]);
+    const b=document.createElement('button');b.className='city';b.innerHTML='<b>0'+(i+1)+'</b><span>'+r.rname+'<small>'+[...new Set(R_.streets.map(x=>x[1]))].slice(0,2).join(' · ')+'</small></span><i>'+(km/1000).toFixed(1).replace('.',',')+' km</i>';
+    b.setAttribute('aria-pressed',i===RI);b.onclick=()=>setCity(key,i);rb.appendChild(b);});buildWorld();buildTraffic();reset();
   document.querySelectorAll('#cities .city').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===key));
   const first=STOPS[0].name,lastS=STOPS[STOPS.length-1].name;
-  $('kick').textContent=CITY.moto+' · '+CITY.name+', '+CITY.country+(CITY.real?' · vraies rues':'');
+  $('kick').textContent=CITY.name+' · '+CITY.country+(CITY.real?' · vraies rues':'');
   $('intro').textContent='De '+first+' à '+lastS+(CITY.real?', par '+[...new Set(CITY.streets.map(s=>s[1]))].slice(0,4).join(', ')+'.':'.')+' Ralentis à l’arrêt pour prendre un client, dépose-le au bon arrêt et encaisse tes '+CITY.cur+'.';
   $('endKick').textContent='Arrivée · '+lastS;showBest();
   try{localStorage.setItem('mm_city',key);}catch(e){}CITY.introC=CITY.introC||null;}
-const cityBox=$('cities');Object.entries(CITIES).forEach(([k,c])=>{const b=document.createElement('button');b.className='city';b.dataset.k=k;b.textContent=c.name;b.onclick=()=>setCity(k,0);cityBox.appendChild(b);});
-let saved='kinshasa';try{const v=localStorage.getItem('mm_city');if(v&&CITIES[v])saved=v;}catch(e){}
+const cityBox=$('cities');Object.entries(CITIES).filter(([k])=>k==='kinshasa').forEach(([k,c])=>{const b=document.createElement('button');b.className='city';b.dataset.k=k;b.textContent=c.name;b.onclick=()=>setCity(k,0);cityBox.appendChild(b);});
+let saved='kinshasa';
+{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');const d=x.createImageData(128,128);for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255;}x.putImageData(d,0,0);document.documentElement.style.setProperty('--grain','url('+c.toDataURL()+')');}
 $('play').disabled=true;$('play').textContent='Chargement…';
 const loader=new THREE.GLTFLoader(),TPL={};
 const b64=b=>{const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u.buffer;};
