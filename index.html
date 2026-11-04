@@ -197,7 +197,7 @@ a.ghost{display:inline-flex;align-items:center;justify-content:center;text-decor
     <div class="go"><button class="cta big" id="play">▶ Jouer</button><button class="ghost" id="garageBtn">🛠️ Garage</button><span class="fine" id="best"></span></div>
     <p class="fine" id="grade"></p><p class="daily" id="daily"></p>
     <p class="keys"><b>But du jeu :</b> tu es un wewa (moto-taxi). Ralentis près du faisceau jaune pour prendre un client, dépose-le au faisceau vert, encaisse. Bonus sur la route : 🥤 Tangawisi (hyper vitesse), 🌶️ Pili-pili (boule de feu), 🍛 Malewa (protection), 🍩 Mikate (combo), ⛽ Kadhafi (essence), 📣 Atalaku (gains ×2). 🚨 Cortège : serre à droite ! Clavier : <kbd>↑</kbd> gaz · <kbd>↓</kbd> frein · <kbd>←</kbd><kbd>→</kbd> direction · <kbd>H</kbd> klaxon.</p>
-    <p class="credits">Rues réelles © contributeurs OpenStreetMap · Avec <b>SangoNews</b> · <b>Wenze</b></p>
+    <p class="credits">Rues réelles © contributeurs OpenStreetMap · Avec <b>SangoNews</b> · <a href="https://wenze.myspreadshop.fr/all" target="_blank" rel="noopener" style="color:var(--taxi)"><b>Boutique Wenze</b></a></p>
   </div>
 </div>
 
@@ -695,7 +695,7 @@ function drawMini(){mg.clearRect(0,0,220,220);mg.strokeStyle='#f6f1e4';mg.lineWi
   const[a,b]=mp(frame(S.s).p);mg.fillStyle='#ce1126';mg.beginPath();mg.arc(a,b,9,0,7);mg.fill();mg.strokeStyle='#fff';mg.lineWidth=3;mg.stroke();}
 
 /* ---------- FX : bonus, clients spéciaux, événements, cortèges, progression ---------- */
-const SITE='https://sangonews243-creator.github.io/moto-mboka/', WENZE_URL='';
+const SITE='https://sangonews243-creator.github.io/moto-mboka/', WENZE_URL='https://wenze.myspreadshop.fr/all';
 const MATCHDAY=[0,3,6].includes(new Date().getDay());
 const CT={normal:{n:'Client',col:0xf2c230,css:'#f2c230',m:1,ic:'✋',tip:''},
   sapeur:{n:'Sapeur',col:0xc04cff,css:'#d68bff',m:2.5,ic:'🕴️',tip:'Gros pourboire… mais zéro choc !'},
