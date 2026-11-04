@@ -1,4 +1,7 @@
+<!doctype html>
+<html lang="fr">
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>Moto Mboka</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -160,6 +163,14 @@ h1 span{color:var(--taxi);display:block}
 #eXp{font-size:15px;color:var(--taxi)}#eXp small{color:var(--ink)}
 a.ghost{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 @media (max-height:520px) and (orientation:landscape){#fx{top:calc(52px + env(safe-area-inset-top,0px))}#fx b{font-size:11px;padding:2px 6px}.daily{font-size:12px;padding:4px 8px}}
+
+/* v0.9.4 : boutons plus gros (retours testeurs) */
+.pad.l button{width:104px!important;height:96px!important;border-radius:22px!important;font-size:34px!important}
+.pad button.horn{width:84px!important;height:56px!important;border-radius:16px!important;font:400 15px var(--display)!important;background:var(--rdc)!important;color:#fff!important;border-color:#fff!important}
+@media (max-height:520px) and (orientation:landscape){.pad.l button{width:92px!important;height:80px!important;font-size:30px!important}.pad button.horn{width:78px!important;height:48px!important;font-size:13px!important}}
+@media (orientation:portrait) and (max-width:520px){.pad{gap:2vw!important}.pad.l{left:3vw!important}.pad.r{right:3vw!important}
+.pad.l button{width:min(84px,20vw)!important;height:min(84px,20vw)!important}.pad button.brk{width:min(80px,20vw)!important;height:min(80px,20vw)!important}.pad button.gas{width:min(94px,23vw)!important;height:min(94px,23vw)!important}
+#target{bottom:calc(184px + env(safe-area-inset-bottom,0px))!important}#mini{bottom:calc(270px + env(safe-area-inset-bottom,0px))!important}#speed{bottom:calc(270px + env(safe-area-inset-bottom,0px))!important}#radio{bottom:calc(372px + env(safe-area-inset-bottom,0px))!important}}
 </style>
 
 <canvas id="c"></canvas>
@@ -177,7 +188,7 @@ a.ghost{display:inline-flex;align-items:center;justify-content:center;text-decor
 <button id="radio" hidden aria-label="Changer de musique">♪ Radio</button>
 <div id="speed" hidden>0<small>KM/H</small></div>
 <div class="pad l" id="padL" hidden><button id="bL" aria-label="Gauche">◀</button><button id="bR" aria-label="Droite">▶</button></div>
-<div class="pad r" id="padR" hidden><button id="bH" class="horn" aria-label="Klaxon">📯</button><button id="bB" class="brk" aria-label="Freiner">FREIN</button><button id="bG" class="gas" aria-label="Accélérer">GAZ</button></div>
+<div class="pad r" id="padR" hidden><button id="bH" class="horn" aria-label="Klaxon"><span>KLAXON</span></button><button id="bB" class="brk" aria-label="Freiner">FREIN</button><button id="bG" class="gas" aria-label="Accélérer">GAZ</button></div>
 
 <div class="screen home" id="start">
   <div class="letterbox top"></div><div class="letterbox bot"></div><div class="grain"></div>
@@ -196,7 +207,7 @@ a.ghost{display:inline-flex;align-items:center;justify-content:center;text-decor
     <p id="intro"></p>
     <div class="go"><button class="cta big" id="play">▶ Jouer</button><button class="ghost" id="garageBtn">🛠️ Garage</button><span class="fine" id="best"></span></div>
     <p class="fine" id="grade"></p><p class="daily" id="daily"></p>
-    <p class="keys"><b>But du jeu :</b> tu es un wewa (moto-taxi). Ralentis près du faisceau jaune pour prendre un client, dépose-le au faisceau vert, encaisse. Bonus sur la route : 🥤 Tangawisi (hyper vitesse), 🌶️ Pili-pili (boule de feu), 🍛 Malewa (protection), 🍩 Mikate (combo), ⛽ Kadhafi (essence), 📣 Atalaku (gains ×2). 🚨 Cortège : serre à droite ! Clavier : <kbd>↑</kbd> gaz · <kbd>↓</kbd> frein · <kbd>←</kbd><kbd>→</kbd> direction · <kbd>H</kbd> klaxon.</p>
+    <p class="keys"><b>But du jeu :</b> tu es un wewa (moto-taxi). Ralentis près du faisceau jaune pour prendre un client, dépose-le au faisceau vert, encaisse. Bonus sur la route : 🥤 Tangawisi (hyper vitesse), 🌶️ Pili-pili (boule de feu), 🍛 Malewa (protection), 🍩 Mikate (combo), ⛽ Kadhafi (essence), 📣 Atalaku (gains ×2). 🚨 Cortège : serre à droite ! Clavier : <kbd>↑</kbd> gaz · <kbd>↓</kbd> frein · <kbd>←</kbd><kbd>→</kbd> direction · <kbd>H</kbd> klaxon (sur téléphone : bouton bleu KLAXON).</p>
     <p class="credits">Rues réelles © contributeurs OpenStreetMap · Avec <b>SangoNews</b> · <a href="https://wenze.myspreadshop.fr/all" target="_blank" rel="noopener" style="color:var(--taxi)"><b>Boutique Wenze</b></a></p>
   </div>
 </div>
@@ -484,8 +495,8 @@ function buildWorld(){
   // piétons
   instPeople(people);
   // panneaux publicitaires
-  const ADS=(CITY.ads||[]).concat([['TA PUB ICI','Ton enseigne vue à '+CITY.name,'#f2c230','#17191e'],['SANGONEWS','L\'actu d\'Afrique chaque jour','#ce1126','#ffffff']]);
-  let ai=0;for(let q=L*.05;q<L-80;q+=rnd(300,420)){const sd=ai%2?1:-1;const v=worldAt(q,sd*(WALK1+3));if(excluded(v)){continue;}billboard(q,sd,...ADS[ai%ADS.length]);ai++;}
+  const ADS=[['ABONNE-TOI À SANGONEWS','YouTube · TikTok · L\'actu du Congo chaque jour','#ce1126','#ffffff'],['WENZE','Fierté congolaise · wenze.myspreadshop.fr','#17191e','#f2c230'],['SANGONEWS','Abonne-toi ! L\'actu d\'Afrique en lingala et français','#0a6ed1','#ffffff'],['TA PUB ICI','Ton enseigne vue à '+CITY.name,'#f2c230','#17191e']].concat(CITY.ads||[]);
+  let ai=0;for(let q=L*.04;q<L-80;q+=rnd(200,280)){const sd=ai%2?1:-1;const v=worldAt(q,sd*(WALK1+3));if(excluded(v)){continue;}billboard(q,sd,...ADS[ai%ADS.length]);ai++;}
   // arrêts
   const zoneMat=new THREE.MeshBasicMaterial({color:0xf2c230,transparent:true,opacity:.5,depthWrite:false});
   STOPS.forEach(st=>{
@@ -502,6 +513,9 @@ function buildWorld(){
     st.mark=beacon(0xf2c230);place(st.mark,st.s,WALK0+.9,0);world.add(st.mark);
     st.dest=beacon(0x2ee06b);place(st.dest,st.s,ROAD_H-1.9,0);st.dest.visible=false;world.add(st.dest);
   });
+  // portiques SangoNews au-dessus du boulevard
+  for(const f of [.15,.42,.7]){const pg=new THREE.Group();const bb=new THREE.Mesh(new THREE.PlaneGeometry(24,3.2),new THREE.MeshBasicMaterial({map:signTex('ABONNE-TOI À SANGONEWS','YouTube · TikTok · Facebook','#ce1126','#ffffff',24,3.2),side:THREE.DoubleSide}));bb.position.y=8.6;
+    const q1=new THREE.Mesh(new THREE.BoxGeometry(.5,10,.5),M.metal);q1.position.set(-12.5,5,0);const q2=q1.clone();q2.position.x=12.5;pg.add(bb,q1,q2);place(pg,L*f,6.8,0,true);world.add(pg);}
   // arrivée
   const fin=new THREE.Group();{const b=new THREE.Mesh(new THREE.PlaneGeometry(26,3),new THREE.MeshBasicMaterial({map:signTex('ARRIVÉE',STOPS[STOPS.length-1].name,'#ce1126','#ffffff',26,3),side:THREE.DoubleSide}));b.position.y=9;
     const p1=new THREE.Mesh(new THREE.BoxGeometry(.6,10.5,.6),M.metal);p1.position.set(-13,5.2,0);const p2=p1.clone();p2.position.x=13;fin.add(b,p1,p2);place(fin,L-25,0,0,true);world.add(fin);}
@@ -509,10 +523,10 @@ function buildWorld(){
   computeMini();
 }
 function billboard(s,side,text,sub,bg,fg){const g=new THREE.Group();
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(12,5),new THREE.MeshBasicMaterial({map:signTex(text,sub,bg,fg,12,5)}));m.position.set(0,8,.2);
-  const back=new THREE.Mesh(new THREE.BoxGeometry(12.4,5.4,.3),M.dark);back.position.set(0,8,0);
-  const pole=new THREE.Mesh(new THREE.CylinderGeometry(.25,.3,6,8),M.metal);pole.position.y=3;
-  g.add(back,m,pole);g.traverse(o=>{if(o.isMesh)o.castShadow=true;});place(g,s,side*(WALK1+3),0,false);g.rotation.y-=side*0.45;world.add(g);}
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(16,6.5),new THREE.MeshBasicMaterial({map:signTex(text,sub,bg,fg,16,6.5)}));m.position.set(0,9,.2);
+  const back=new THREE.Mesh(new THREE.BoxGeometry(16.4,6.9,.3),M.dark);back.position.set(0,9,0);
+  const pole=new THREE.Mesh(new THREE.CylinderGeometry(.3,.35,6,8),M.metal);pole.position.y=3;
+  g.add(back,m,pole);g.traverse(o=>{if(o.isMesh)o.castShadow=true;});place(g,s,side*(WALK1+2),0,false);g.rotation.y-=side*0.6;world.add(g);}
 function instGLB(key,list,tint){if(!list.length)return;TPL[key].updateMatrixWorld(true);
   TPL[key].traverse(o=>{if(!o.isMesh)return;let mt=o.material;if(key==='flag'&&mt.name==='flag'){mt=mt.clone();mt.map=T.flag;mt.color.set(0xffffff);mt.side=THREE.DoubleSide;}
     if(tint&&mt.name===tint){mt=mt.clone();mt.color.set(0xffffff);}
@@ -768,8 +782,8 @@ function hitCar(c){
   if(FX.eff.fire>0){c.x=c.x===LANES_R[2]?LANES_R[0]:LANES_R[2];c.s+=7;c.v=Math.max(c.v,14);S.crashCool=.2;const g=money(30*fareMult());S.fc+=g;toast('🔥 BOUM ! +'+fcFmt(g));beep([900,600]);return;}
   S.crashCool=1.5;S.shake=.6;S.crashes++;FX.jams.forEach(z=>{if(z.on)z.hit=true;});
   if(FX.eff.shield>0){S.v*=.7;toast('🍛 Le malewa te protège !');beep([400,520]);return;}
-  S.v*=.4;const pen=money(150);S.fc=Math.max(0,S.fc-pen);beep([180,120]);
-  if(S.carrying){const t=S.carrying.type;if(t==='sapeur'){toast('Costume sali ! Le sapeur descend −'+fcFmt(pen));S.carrying.dest.visible=false;S.carrying=null;passenger.visible=false;}
+  const hard=S.v>20;S.v*=.4;const pen=money(150);S.fc=Math.max(0,S.fc-pen);beep([180,120]);
+  if(S.carrying){const t=S.carrying.type;if(hard&&t!=='sapeur'){toast('Choc trop violent ! Le client descend −'+fcFmt(pen));S.carrying.dest.visible=false;S.carrying=null;passenger.visible=false;}else if(t==='sapeur'){toast('Costume sali ! Le sapeur descend −'+fcFmt(pen));S.carrying.dest.visible=false;S.carrying=null;passenger.visible=false;}
     else{S.carrying.dmg++;toast('Aïe ! −'+fcFmt(pen)+(t==='maman'?' · Maman reste zen':' · pourboire en baisse'));}}
   else toast('Aïe ! −'+fcFmt(pen));}
 function jingle(){if(!ac)return;[523,659,784,1047,784,1047,1319].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime+i*.11;o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(.08,t);g.gain.exponentialRampToValueAtTime(.001,t+.16);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.18);});}
@@ -797,6 +811,8 @@ function fxAudio(){if(!ac||sirO)return;sirO=ac.createOscillator();sirO.type='saw
   const nb=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate),ch=nb.getChannelData(0);for(let i=0;i<ch.length;i++)ch[i]=Math.random()*2-1;
   const ns=ac.createBufferSource();ns.buffer=nb;ns.loop=true;const bp=ac.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1400;bp.Q.value=.6;rainG=ac.createGain();rainG.gain.value=0;ns.connect(bp);bp.connect(rainG);rainG.connect(ac.destination);ns.start();}
 function fxStep(dt){FX.hint='';fxAudio();
+  if(S.carrying&&S.s>S.carrying.dest.s+45){toast('Arrêt dépassé ! Le client descend fâché');beep([300,200]);S.carrying.dest.visible=false;S.carrying=null;passenger.visible=false;}
+  else if(S.carrying&&S.s>S.carrying.dest.s+15)FX.hint='⚠️ Tu dépasses l\'arrêt ! Freine et recule (reste sur FREIN)';
   for(const k in FX.eff)if(FX.eff[k]>0)FX.eff[k]-=dt;if(FX.comboT>0)FX.comboT-=dt;
   S.fuel=Math.max(0,S.fuel-Math.abs(S.v)*dt/40*(FX.eff.hyper>0?1.4:1));
   if(S.fuel<=0)FX.hint='⛽ Panne sèche ! Ramasse un bidon KADHAFI (bleu)';else if(S.fuel<20)FX.hint='⛽ Réservoir presque vide : cherche un bidon KADHAFI';
@@ -879,13 +895,13 @@ function step(dt){
     // évite de rentrer dans la voiture de devant (même voie)
     if(S.crashCool<=0&&c.dir>0&&Math.abs(c.s-S.s)<c.len/2+.9&&Math.abs(c.x-S.x)<(c.len<3?.9:1.6))hitCar(c);
     place(c.mesh,c.s,c.x,0,c.dir<0);if(c.mesh.userData.wheels)c.mesh.userData.wheels.forEach(w=>w.rotation.x-=c.v*dt/.33);}
-  let hint='';{const tg=S.carrying?S.carrying.dest:nextWaiting();if(tg){const d=tg.s-S.s;if(d>0&&d<90&&S.v>=15)hint='Freine ! '+(S.carrying?'Dépose ton client':'Ton client est là')+' dans '+Math.round(d)+' m';else if(d<=-14&&d>-60&&S.v<12)hint='Trop loin ! Reste appuyé sur FREIN pour reculer';else if(d>-14&&d<60&&S.x<=5.4)hint='Serre à droite pour '+(S.carrying?'déposer':'prendre')+' le client';}}
-  for(const stp of STOPS){const near=stp.s-S.s<22&&stp.s-S.s>-14&&S.x>5.4;
-    if(!S.carrying&&stp.waiting&&near){if(Math.abs(S.v)<15){stp.waiting=false;stp.waitObj.visible=stp.mark.visible=false;
+  let hint='';{const tg=S.carrying?S.carrying.dest:nextWaiting();if(tg){const d=tg.s-S.s;if(d>0&&d<110&&S.v>=22)hint='Freine ! '+(S.carrying?'Dépose ton client':'Ton client est là')+' dans '+Math.round(d)+' m';else if(d<=-14&&d>-60&&S.v<12)hint='Trop loin ! Reste appuyé sur FREIN pour reculer';else if(d>-18&&d<70&&S.x<=4.4)hint='Serre à droite pour '+(S.carrying?'déposer':'prendre')+' le client';}}
+  for(const stp of STOPS){const near=stp.s-S.s<32&&stp.s-S.s>-18&&S.x>4.4;
+    if(!S.carrying&&stp.waiting&&near){if(Math.abs(S.v)<22){stp.waiting=false;stp.waitObj.visible=stp.mark.visible=false;
         const idx=STOPS.indexOf(stp),d=clientDest(stp,idx),ty=stp.ctype||'normal',ct=CT[ty];
         S.carrying={dest:d,from:stp.s,pick:S.t,type:ty,dmg:0};d.dest.visible=true;passenger.visible=true;toast(ty==='normal'?'Client à bord !':ct.ic+' '+ct.n+' ! '+ct.tip);beep([520,780]);}
       else hint='Ralentis pour prendre le client';}
-    if(S.carrying&&S.carrying.dest===stp&&near){if(Math.abs(S.v)<15){const dist=stp.s-S.carrying.from,dur=S.t-S.carrying.pick;
+    if(S.carrying&&S.carrying.dest===stp&&near){if(Math.abs(S.v)<22){const dist=stp.s-S.carrying.from,dur=S.t-S.carrying.pick;
         const ty=S.carrying.type,fm=fareMult();const fare=money((300+dist*0.9+Math.max(0,dist/22-dur)*40)*CT[ty].m*Math.pow(.75,S.carrying.dmg)*fm);S.fc+=fare;if(ty==='sapeur')S.sap++;if(ty==='maman')S.rep++;S.clients++;stp.dest.visible=false;S.carrying=null;passenger.visible=false;toast('+'+fcFmt(fare)+(ty==='maman'?' · réputation +1':ty==='sapeur'?' · Pourboire de sapeur !':'')+(fm>1?' (×'+String(Math.round(fm*10)/10).replace('.',',')+')':''));beep([660,880,1320]);}
       else hint='Ralentis pour déposer le client';}}
   let m;if(S.carrying)m='Dépose ton client à : '+S.carrying.dest.name+' ('+Math.max(0,Math.round(S.carrying.dest.s-S.s))+' m)';
