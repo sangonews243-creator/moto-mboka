@@ -235,7 +235,7 @@ a.ghost{display:inline-flex;align-items:center;justify-content:center;text-decor
     </div>
     <p id="eMsg"></p>
     <p id="eXp"></p>
-    <div class="row"><button class="cta" id="again">Rejouer</button><button class="ghost" id="share">Copier mon score</button><a class="ghost" id="wa" href="#" target="_blank" rel="noopener">📲 WhatsApp</a></div>
+    <div class="row"><button class="cta" id="again">Rejouer</button><button class="ghost" id="share">Copier mon score</button><button class="ghost" id="home">🏠 Accueil</button><a class="ghost" id="wa" href="#" target="_blank" rel="noopener">📲 WhatsApp</a></div>
     <p class="fine">Kinshasa : vraies rues © contributeurs OpenStreetMap. Autres villes : tracés inspirés. Prototype.</p>
   </div>
 </div>
@@ -972,12 +972,13 @@ function getBest(){try{return JSON.parse(localStorage.getItem('mm_best_'+CKEY)||
 function showBest(){const b=getBest();$('best').textContent=b?'Record : '+fcFmt(b.fc)+' en '+fmt(b.t):'';}
 function start(){audioInit();if(ac&&ac.state==='suspended')ac.resume();startRadio();reset();const f=frame(0);camPos.copy(f.p).add(new THREE.Vector3(0,6,12));S.running=true;$('start').hidden=$('end').hidden=true;ui.forEach(i=>$(i).hidden=false);toast('Yaka ! Go !');}
 let lastMsg='';
-function finish(){S.running=false;S.v=0;ui.forEach(i=>$(i).hidden=true);
+function finish(){S.running=false;S.v=0;toastT=0;$('toast').style.opacity=0;ui.forEach(i=>$(i).hidden=true);
   const b=getBest();const rec=!b||S.fc>b.fc||(S.fc===b.fc&&S.t<b.t);if(rec){try{localStorage.setItem('mm_best_'+CKEY,JSON.stringify({fc:S.fc,t:S.t}));}catch(e){}}
   $('eFc').textContent=S.fc.toLocaleString('fr-FR');$('eCl').textContent=S.clients;$('eT').textContent=fmt(S.t);
   $('eMsg').textContent=rec?'Nouveau record personnel. Lance le défi à tes amis.':'Record à battre : '+fcFmt(b.fc)+' en '+fmt(b.t)+'.';
   const grd=fxFinish();lastMsg='🏍️ Moto Mboka '+CITY.name+' : '+fcFmt(S.fc)+', '+S.clients+' clients en '+fmt(S.t)+', de '+STOPS[0].name+' à '+STOPS[STOPS.length-1].name+'. Grade : '+grd+'. Tu fais mieux ? '+SITE+' #MotoMboka';$('wa').href='https://wa.me/?text='+encodeURIComponent(lastMsg);
   $('end').hidden=false;$('share').textContent='Copier mon score';showBest();}
+$('home').onclick=()=>{$('end').hidden=true;$('garage').hidden=true;$('start').hidden=false;showBest();fxHome();};
 $('play').onclick=()=>{$('garage').hidden=true;start();};$('again').onclick=start;
 $('share').onclick=()=>{const b=$('share');const done=()=>b.textContent='Score copié';
   if(navigator.clipboard)navigator.clipboard.writeText(lastMsg).then(done,()=>{$('eMsg').textContent=lastMsg;b.textContent='Sélectionne le texte';});else{$('eMsg').textContent=lastMsg;}};
