@@ -63,7 +63,7 @@ h1 span{color:var(--taxi);display:block}
 .home .grain{position:fixed;inset:0;pointer-events:none;opacity:.12;mix-blend-mode:overlay;background-image:var(--grain);z-index:0}
 .home::after{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 70% 45%,transparent 45%,rgba(0,0,0,.55) 100%)}
 .hero{position:relative;z-index:1;max-width:560px;display:grid;gap:16px;align-content:center;padding-block:calc(7vh + 8px) calc(7vh + 8px);min-height:100%}
-.brand{display:grid;gap:14px}.brand .kicker{position:relative;z-index:2}
+.brand{display:grid;gap:10px}.gamebadge{background:#ce1126!important;color:#fff!important;justify-self:start}.brand .kicker{position:relative;z-index:2}
 .logo{padding-top:18px;font-family:"Anton",Impact,"Arial Narrow",sans-serif;font-weight:400;margin:0;line-height:.86;transform:skewY(-4deg) rotate(-2deg);transform-origin:left;display:grid;letter-spacing:.01em}
 .logo span{display:block;-webkit-text-stroke:3px #0d0b0f;paint-order:stroke fill;text-shadow:6px 6px 0 #ce1126,0 0 30px rgba(0,0,0,.6)}
 .logo .l1{font-size:clamp(56px,15vw,112px);color:#f6f1e4}
@@ -106,6 +106,24 @@ h1 span{color:var(--taxi);display:block}
 #mini{bottom:calc(178px + env(safe-area-inset-bottom,0px))!important}
 #radio{bottom:calc(282px + env(safe-area-inset-bottom,0px))!important}
 #speed{bottom:calc(180px + env(safe-area-inset-bottom,0px))!important}
+
+/* ---- Commandes tactiles plus grandes (retours testeurs) ---- */
+.pad{gap:14px;touch-action:none}
+.pad button{width:84px;height:84px;font-size:26px;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.pad button.gas{width:104px;height:104px;font-size:22px}
+.pad button.brk{width:92px;height:92px;font-size:17px}
+.pad button.horn{width:62px;height:62px;font-size:26px;background:rgba(23,25,30,.7);position:absolute;right:4px;bottom:calc(100% + 12px)}
+.pad.r{right:max(22px,calc(env(safe-area-inset-right,0px) + 8px));align-items:flex-end}
+.pad.l{left:max(16px,env(safe-area-inset-left,0px))}
+@media (max-height:520px) and (orientation:landscape){
+  .pad button{width:72px;height:72px;font-size:22px}.pad button.gas{width:86px;height:86px;font-size:18px}.pad button.brk{width:76px;height:76px;font-size:14px}.pad button.horn{width:52px;height:52px;font-size:22px}
+  .pad.r{right:max(70px,calc(env(safe-area-inset-right,0px) + 56px))}
+  #mini{bottom:calc(98px + env(safe-area-inset-bottom,0px))!important}
+  #speed{bottom:calc(104px + env(safe-area-inset-bottom,0px))!important}
+}
+@media (max-width:520px) and (orientation:portrait){#mini{bottom:calc(210px + env(safe-area-inset-bottom,0px))!important}#radio{bottom:calc(312px + env(safe-area-inset-bottom,0px))!important}#target{bottom:calc(118px + env(safe-area-inset-bottom,0px))!important}#speed{bottom:calc(210px + env(safe-area-inset-bottom,0px))!important}
+  .pad button{width:74px;height:74px}.pad button.gas{width:92px;height:92px}.pad button.brk{width:80px;height:80px}.pad button.horn{width:54px;height:54px}.pad{gap:10px}}
+
 /* ---- Téléphone en paysage : HUD compact, route dégagée ---- */
 @media (max-height:520px) and (orientation:landscape){
   .hud{padding-top:calc(6px + env(safe-area-inset-top,0px))}
@@ -146,12 +164,13 @@ h1 span{color:var(--taxi);display:block}
 <button id="radio" hidden aria-label="Changer de musique">♪ Radio</button>
 <div id="speed" hidden>0<small>KM/H</small></div>
 <div class="pad l" id="padL" hidden><button id="bL" aria-label="Gauche">◀</button><button id="bR" aria-label="Droite">▶</button></div>
-<div class="pad r" id="padR" hidden><button id="bB" class="brk" aria-label="Freiner">■</button><button id="bG" class="gas" aria-label="Accélérer">▲</button></div>
+<div class="pad r" id="padR" hidden><button id="bH" class="horn" aria-label="Klaxon">📯</button><button id="bB" class="brk" aria-label="Freiner">FREIN</button><button id="bG" class="gas" aria-label="Accélérer">GAZ</button></div>
 
 <div class="screen home" id="start">
   <div class="letterbox top"></div><div class="letterbox bot"></div><div class="grain"></div>
   <div class="hero">
     <div class="brand">
+      <span class="kicker gamebadge">🎮 Jeu gratuit · joue direct dans ton navigateur</span>
       <span class="kicker" id="kick">Kinshasa · RDC</span>
       <h1 class="logo"><span class="l1">MOTO</span><span class="l2">MBOKA</span></h1>
       <p class="tag">Kin la belle. Prends tes clients, tiens ta route, encaisse tes francs.</p>
@@ -162,8 +181,8 @@ h1 span{color:var(--taxi);display:block}
       <div id="routes" role="group" aria-label="Choisis ton circuit"></div>
     </div>
     <p id="intro"></p>
-    <div class="go"><button class="cta big" id="play">Démarrer</button><span class="fine" id="best"></span></div>
-    <p class="keys">Clavier : <kbd>↑</kbd> gaz · <kbd>↓</kbd> frein · <kbd>←</kbd><kbd>→</kbd> direction. Mobile : boutons à l'écran.</p>
+    <div class="go"><button class="cta big" id="play">▶ Jouer</button><span class="fine" id="best"></span></div>
+    <p class="keys"><b>But du jeu :</b> tu es un wewa (moto-taxi). Ralentis près du faisceau jaune pour prendre un client, dépose-le au faisceau vert, encaisse. Clavier : <kbd>↑</kbd> gaz · <kbd>↓</kbd> frein · <kbd>←</kbd><kbd>→</kbd> direction · <kbd>H</kbd> klaxon.</p>
     <p class="credits">Rues réelles © contributeurs OpenStreetMap · Avec <b>SangoNews</b> · <b>Wenze</b></p>
   </div>
 </div>
@@ -610,14 +629,21 @@ function reset(){Object.assign(S,{s:12,x:7.3,v:0,vx:0,steer:0,fc:0,clients:0,t:0
 /* ---------- Entrées ---------- */
 addEventListener('keydown',e=>{keys[e.key]=1;if(e.key.startsWith('Arrow'))e.preventDefault();});
 addEventListener('keyup',e=>{keys[e.key]=0;});
-function hold(id,k){const b=$(id);const on=e=>{e.preventDefault();touch[k]=1;b.classList.add('on');audioInit();},off=()=>{touch[k]=0;b.classList.remove('on');};
-  b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointerleave',off);b.addEventListener('pointercancel',off);}
+function hold(id,k){const b=$(id);const on=e=>{e.preventDefault();try{b.setPointerCapture(e.pointerId);}catch(_){}touch[k]=1;b.classList.add('on');audioInit();if(navigator.vibrate)try{navigator.vibrate(8);}catch(_){}},
+  off=e=>{touch[k]=0;b.classList.remove('on');};
+  b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('lostpointercapture',off);b.addEventListener('contextmenu',e=>e.preventDefault());}
 hold('bL','l');hold('bR','r');hold('bG','g');hold('bB','b');
+$('bH').addEventListener('pointerdown',e=>{e.preventDefault();audioInit();horn(true);});addEventListener('keydown',e=>{if(e.key==='h'||e.key==='H'||e.key===' ')horn(true);});
 
 /* ---------- Son ---------- */
 let ac,osc,gain;
 function audioInit(){if(ac)return;try{ac=new (window.AudioContext||window.webkitAudioContext)();osc=ac.createOscillator();osc.type='sawtooth';gain=ac.createGain();gain.gain.value=0;
   const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=520;osc.connect(f);f.connect(gain);gain.connect(ac.destination);osc.start();}catch(e){ac=null;}}
+function horn(player){if(!ac)return;const t=ac.currentTime,dur=player?.32:.22;for(const f of (player?[420,530]:[pick([330,370,440]),pick([415,470,520])])){const o=ac.createOscillator(),g=ac.createGain(),fl=ac.createBiquadFilter();
+  o.type='square';o.frequency.value=f;fl.type='lowpass';fl.frequency.value=1800;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(player?.09:.035,t+.02);g.gain.setValueAtTime(player?.09:.035,t+dur-.05);g.gain.linearRampToValueAtTime(0,t+dur);
+  o.connect(fl);fl.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+dur+.02);}
+  if(player){const b=$('bH');if(b){b.classList.add('on');setTimeout(()=>b.classList.remove('on'),220);}for(const c of traffic){if(c.dir>0&&Math.abs(c.x-S.x)<2&&c.s>S.s&&c.s-S.s<40&&c.x!==LANES_R[0]){c.x=c.x===LANES_R[2]?LANES_R[1]:LANES_R[0];}}}}
+let hornT=3;
 function beep(freqs){if(!ac)return;freqs.forEach((fq,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.type='square';o.frequency.value=fq;g.gain.setValueAtTime(.07,ac.currentTime+i*.09);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+i*.09+.12);o.connect(g);g.connect(ac.destination);o.start(ac.currentTime+i*.09);o.stop(ac.currentTime+i*.09+.14);});}
 
 /* ---------- HUD ---------- */
@@ -646,7 +672,7 @@ const MAXV=38;let last=performance.now();const camPos=new THREE.Vector3(),camLoo
 function step(dt){
   const gas=keys.ArrowUp||keys.w||keys.z||touch.g, brk=keys.ArrowDown||keys.s||touch.b;
   const st=(keys.ArrowRight||keys.d||touch.r?1:0)-(keys.ArrowLeft||keys.a||keys.q||touch.l?1:0);
-  S.v+=(gas?15:0)*dt-(brk?40:0)*dt-(S.v*0.05+1)*dt*(gas?0.2:1);S.v=Math.max(0,Math.min(MAXV,S.v));
+  S.v+=(gas?15:0)*dt-(brk?55:0)*dt-(S.v*0.05+1)*dt*(gas?0.2:1);S.v=Math.max(0,Math.min(MAXV,S.v));
   S.steer+=(st-S.steer)*Math.min(1,dt*9);const latMax=2.5+S.v*.2;S.vx+=(S.steer*latMax-S.vx)*Math.min(1,dt*6);S.x+=S.vx*dt;
   if(S.x<2.3){S.x=2.3;S.vx=Math.max(0,S.vx);}if(S.x>12.2){S.x=12.2;S.vx=Math.min(0,S.vx);}
   S.s+=S.v*dt;S.t+=dt;if(S.crashCool>0)S.crashCool-=dt;
@@ -655,21 +681,22 @@ function step(dt){
     if(c.dir>0&&Math.abs(c.x-S.x)<1.8){const gap=S.s-c.s-(c.len/2+1);if(gap>0&&gap<12)lim=Math.min(lim,S.v*.9);}
     c.v+=(lim-c.v)*Math.min(1,dt*3);c.s+=c.v*c.dir*dt;if(c.s<S.s-60||c.s>S.s+600)spawnCar(c,220);
     // évite de rentrer dans la voiture de devant (même voie)
-    if(S.crashCool<=0&&c.dir>0&&Math.abs(c.s-S.s)<c.len/2+.9&&Math.abs(c.x-S.x)<(c.len<3?.9:1.6)){S.crashCool=1.5;S.v*=.15;S.shake=.6;const pen=money(300);S.fc=Math.max(0,S.fc-pen);toast('Aïe ! −'+fcFmt(pen));beep([180,120]);
+    if(S.crashCool<=0&&c.dir>0&&Math.abs(c.s-S.s)<c.len/2+.9&&Math.abs(c.x-S.x)<(c.len<3?.9:1.6)){S.crashCool=1.5;S.v*=.4;S.shake=.6;const pen=money(150);S.fc=Math.max(0,S.fc-pen);toast('Aïe ! −'+fcFmt(pen));beep([180,120]);
       if(S.carrying){toast('Client perdu ! −'+fcFmt(pen));S.carrying.dest.visible=false;S.carrying=null;passenger.visible=false;}}
     place(c.mesh,c.s,c.x,0,c.dir<0);if(c.mesh.userData.wheels)c.mesh.userData.wheels.forEach(w=>w.rotation.x-=c.v*dt/.33);}
-  let hint='';
-  for(const stp of STOPS){const near=Math.abs(stp.s-S.s)<13&&S.x>9.2;
-    if(!S.carrying&&stp.waiting&&near){if(S.v<9){stp.waiting=false;stp.waitObj.visible=stp.mark.visible=false;
+  let hint='';{const tg=S.carrying?S.carrying.dest:nextWaiting();if(tg){const d=tg.s-S.s;if(d>0&&d<90&&S.v>=15)hint='Freine ! '+(S.carrying?'Dépose ton client':'Ton client est là')+' dans '+Math.round(d)+' m';else if(d>-14&&d<60&&S.x<=5.4)hint='Serre à droite pour '+(S.carrying?'déposer':'prendre')+' le client';}}
+  for(const stp of STOPS){const near=stp.s-S.s<22&&stp.s-S.s>-14&&S.x>5.4;
+    if(!S.carrying&&stp.waiting&&near){if(S.v<15){stp.waiting=false;stp.waitObj.visible=stp.mark.visible=false;
         const idx=STOPS.indexOf(stp),cands=STOPS.filter((d,j)=>j>idx&&j<=idx+3);const d=cands[(Math.random()*cands.length)|0]||STOPS[STOPS.length-1];
         S.carrying={dest:d,from:stp.s,pick:S.t};d.dest.visible=true;passenger.visible=true;toast('Client à bord !');beep([520,780]);}
       else hint='Ralentis pour prendre le client';}
-    if(S.carrying&&S.carrying.dest===stp&&near){if(S.v<9){const dist=stp.s-S.carrying.from,dur=S.t-S.carrying.pick;
+    if(S.carrying&&S.carrying.dest===stp&&near){if(S.v<15){const dist=stp.s-S.carrying.from,dur=S.t-S.carrying.pick;
         const fare=money(300+dist*0.9+Math.max(0,dist/22-dur)*40);S.fc+=fare;S.clients++;stp.dest.visible=false;S.carrying=null;passenger.visible=false;toast('+'+fcFmt(fare));beep([660,880,1320]);}
       else hint='Ralentis pour déposer le client';}}
   let m;if(S.carrying)m='Dépose ton client à : '+S.carrying.dest.name+' ('+Math.max(0,Math.round(S.carrying.dest.s-S.s))+' m)';
   else{const n=nextWaiting();m=n?'Client qui attend : '+n.name+' ('+Math.max(0,Math.round(n.s-S.s))+' m). Voie de droite.':'Fonce vers '+STOPS[STOPS.length-1].name+' !';}
   $('mission').textContent=hint||'';$('mission').style.visibility=hint?'visible':'hidden';$('mission').style.borderLeftColor='#ce1126';
+  hornT-=dt;if(hornT<=0){hornT=rnd(2.5,7);if(ac&&S.running)horn(false);}
   if(S.s>=L-25)finish();
 }
 function render(dt){
@@ -717,18 +744,22 @@ const TRACKS=[['Congolais jusqu’à la mort','congolais-jusqua-la-mort.mp3'],['
 let radioI=-1,radioSrc=null,radioGain=null,radioOn=false;const bufs={};
 const radio={get paused(){return !radioOn;}};
 function stopRadio(){radioOn=false;if(radioSrc){try{radioSrc.onended=null;radioSrc.stop();}catch(e){}radioSrc=null;}}
-function nextTrack(){audioInit();if(!ac){$('radio').textContent='♪ Son non pris en charge';return;}if(ac.state==='suspended')ac.resume();
-  stopRadio();radioI=(radioI+1)%(TRACKS.length+1);if(radioI===TRACKS.length){$('radio').textContent='♪ Radio coupée';return;}
-  const [name,url]=TRACKS[radioI],i=radioI;$('radio').textContent='♪ Chargement…';let stage='réseau';
+const ORDER=TRACKS.map((_,i)=>i).sort(()=>Math.random()-.5);let oi=-1,radioOff=false;
+function playTrack(){if(!ac)audioInit();if(!ac){$('radio').textContent='♪ Son non pris en charge';return;}if(ac.state==='suspended')ac.resume();
+  stopRadio();const i=ORDER[oi],[name,url]=TRACKS[i],tok=oi;$('radio').textContent='♪ Chargement…';let stage='réseau';
   (bufs[url]?Promise.resolve(bufs[url]):(window.MUSIC64&&MUSIC64[url]?Promise.resolve(b64(MUSIC64[url])).then(x=>{stage='décodage';return x;}):fetch(url).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);stage='décodage';return r.arrayBuffer();}))
     .then(ab=>new Promise((res,rej)=>ac.decodeAudioData(ab,res,rej))).then(b=>{Object.keys(bufs).forEach(k=>delete bufs[k]);return bufs[url]=b;}))
-    .then(buf=>{if(i!==radioI)return;if(!radioGain){radioGain=ac.createGain();radioGain.gain.value=.7;radioGain.connect(ac.destination);}
-      radioSrc=ac.createBufferSource();radioSrc.buffer=buf;radioSrc.connect(radioGain);radioSrc.onended=()=>{if(radioOn&&i===radioI)nextTrack();};radioSrc.start();radioOn=true;$('radio').textContent='♪ '+name;})
+    .then(buf=>{if(tok!==oi||radioOff)return;if(!radioGain){radioGain=ac.createGain();radioGain.gain.value=.7;radioGain.connect(ac.destination);}
+      radioSrc=ac.createBufferSource();radioSrc.buffer=buf;radioSrc.connect(radioGain);radioSrc.onended=()=>{if(radioOn&&tok===oi&&!radioOff){oi=(oi+1)%ORDER.length;playTrack();}};radioSrc.start();radioOn=true;
+      $('radio').textContent='♪ '+name+'  ⏭';})
     .catch(e=>{$('radio').textContent='♪ Erreur '+stage+(e&&e.message?' : '+e.message:'');});}
-$('radio').onclick=()=>nextTrack();
+function nextTrack(){radioOff=false;oi=(oi+1)%ORDER.length;playTrack();}
+function startRadio(){if(radioOff||radioOn)return;if(oi<0)oi=0;playTrack();}
+let pressT=0;$('radio').addEventListener('pointerdown',()=>{pressT=performance.now();});
+$('radio').onclick=()=>{if(performance.now()-pressT>600||radioOn&&false){}if(performance.now()-pressT>600){radioOff=true;stopRadio();$('radio').textContent='♪ Musique coupée (touche pour relancer)';return;}nextTrack();};
 function getBest(){try{return JSON.parse(localStorage.getItem('mm_best_'+CKEY)||'null');}catch(e){return null;}}
 function showBest(){const b=getBest();$('best').textContent=b?'Record : '+fcFmt(b.fc)+' en '+fmt(b.t):'';}
-function start(){audioInit();if(ac&&ac.state==='suspended')ac.resume();if(!radioOn&&radioI<TRACKS.length){radioI=-1;nextTrack();}reset();const f=frame(0);camPos.copy(f.p).add(new THREE.Vector3(0,6,12));S.running=true;$('start').hidden=$('end').hidden=true;ui.forEach(i=>$(i).hidden=false);toast('Yaka ! Go !');}
+function start(){audioInit();if(ac&&ac.state==='suspended')ac.resume();startRadio();reset();const f=frame(0);camPos.copy(f.p).add(new THREE.Vector3(0,6,12));S.running=true;$('start').hidden=$('end').hidden=true;ui.forEach(i=>$(i).hidden=false);toast('Yaka ! Go !');}
 let lastMsg='';
 function finish(){S.running=false;S.v=0;ui.forEach(i=>$(i).hidden=true);
   const b=getBest();const rec=!b||S.fc>b.fc||(S.fc===b.fc&&S.t<b.t);if(rec){try{localStorage.setItem('mm_best_'+CKEY,JSON.stringify({fc:S.fc,t:S.t}));}catch(e){}}
@@ -757,7 +788,7 @@ $('play').disabled=true;$('play').textContent='Chargement…';
 const loader=new THREE.GLTFLoader(),TPL={};
 const b64=b=>{const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u.buffer;};
 Promise.all(Object.entries(ASSETS).map(([k,b])=>new Promise((res,rej)=>loader.parse(b64(b),'',g=>{g.scene.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true;o.geometry.userData.keep=true;}});TPL[k]=g.scene;res();},rej))))
-  .then(()=>{makePlayer();setCity(saved);$('play').disabled=false;$('play').textContent='Démarrer';requestAnimationFrame(loop);})
+  .then(()=>{makePlayer();setCity(saved);$('play').disabled=false;$('play').textContent='▶ Jouer';requestAnimationFrame(loop);})
   .catch(e=>{$('play').textContent='Erreur de chargement';console.error(e);});
 })();
 
