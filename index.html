@@ -53,8 +53,24 @@ h1 span{color:var(--taxi);display:block}
 .city{font-family:var(--body);font-weight:700;font-size:13px;background:transparent;color:var(--ink);border:2px solid var(--ink);padding:6px 10px;cursor:pointer}
 .city[aria-pressed="true"]{background:var(--ink);color:var(--asphalt)}
 .city:focus-visible{outline:3px solid var(--taxi);outline-offset:2px}
-#cities{gap:8px}
+#cities,#routes{gap:8px}
 @media (prefers-reduced-motion:reduce){#toast{transition:none}}
+#target{--c:#f2c230;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;width:min(92vw,520px);background:rgba(23,25,30,.9);border:3px solid var(--c);padding:8px 12px 12px;pointer-events:none;box-shadow:0 0 18px color-mix(in srgb,var(--c) 45%,transparent)}
+#target #tIcon{font-size:26px;width:44px;height:44px;display:grid;place-items:center;background:var(--c);color:#17191e;border-radius:50%}
+#target div{min-width:0;display:grid}
+#target small{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--c);font-weight:800}
+#target b{font-family:var(--display);font-weight:400;font-size:clamp(15px,4.2vw,21px);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#target i{font-style:normal;font-size:11px;opacity:.8}
+#target strong{font-family:var(--display);font-weight:400;font-size:clamp(24px,7vw,34px);color:var(--c);font-variant-numeric:tabular-nums}
+#target .bar{position:absolute;left:0;right:0;bottom:0;height:5px;background:rgba(255,255,255,.15)}
+#target .bar span{display:block;height:100%;width:0;background:var(--c);transition:width .2s}
+#target.near{animation:pulse .6s ease-in-out infinite alternate}
+@keyframes pulse{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.06)}}
+@media (prefers-reduced-motion:reduce){#target.near{animation:none}}
+#mini{bottom:calc(178px + env(safe-area-inset-bottom,0px))!important}
+#radio{bottom:calc(282px + env(safe-area-inset-bottom,0px))!important}
+#speed{bottom:calc(180px + env(safe-area-inset-bottom,0px))!important}
+
 #radio{position:fixed;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(200px + env(safe-area-inset-bottom,0px));max-width:min(60vw,260px);background:rgba(23,25,30,.85);color:var(--ink);border:2px solid var(--taxi);font-family:var(--body);font-weight:700;font-size:12px;padding:6px 10px;cursor:pointer;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #radio:focus-visible{outline:3px solid var(--rdc)}
 </style>
@@ -68,6 +84,7 @@ h1 span{color:var(--taxi);display:block}
 </div>
 <div id="mission" hidden></div>
 <div id="toast"></div>
+<div id="target" hidden><span id="tIcon">✋</span><div><small id="tKind">Client qui attend</small><b id="tName">—</b><i id="tFin"><span id="tFinish"></span></i></div><strong id="tDist">0 m</strong><span class="bar"><span id="tBar"></span></span></div>
 <canvas id="mini" width="220" height="220" hidden></canvas>
 <button id="radio" hidden aria-label="Changer de musique">♪ Radio</button>
 <div id="speed" hidden>0<small>KM/H</small></div>
@@ -79,6 +96,7 @@ h1 span{color:var(--taxi);display:block}
     <span class="kicker" id="kick">wewa · Kinshasa</span>
     <h1>Moto <span>Mboka</span></h1>
     <div class="row" id="cities" role="group" aria-label="Choisis ta ville"></div>
+    <div class="row" id="routes" role="group" aria-label="Choisis ton circuit" hidden></div>
     <p id="intro"></p>
     <p class="keys">Clavier : <kbd>↑</kbd> gaz · <kbd>↓</kbd> frein · <kbd>←</kbd><kbd>→</kbd> direction. Mobile : boutons à l'écran.</p>
     <div class="row"><button class="cta" id="play">Démarrer</button><span class="fine" id="best"></span></div>
@@ -190,6 +208,8 @@ const M={
 /* ---------- Villes ---------- */
 // Kinshasa : géométrie réelle (OSRM / © contributeurs OpenStreetMap), en mètres, origine Échangeur de Limete
 const KIN_WP=[[88,-44],[74,-73],[4,-204],[-55,-322],[-70,-348],[-96,-386],[-124,-424],[-151,-461],[-185,-503],[-255,-626],[-434,-974],[-523,-1146],[-559,-1216],[-725,-1541],[-785,-1653],[-818,-1728],[-834,-1758],[-974,-2029],[-1049,-2174],[-1132,-2335],[-1220,-2506],[-1307,-2674],[-1337,-2735],[-1366,-2793],[-1833,-3692],[-1877,-3775],[-1895,-3811],[-1967,-3951],[-2051,-4117],[-2137,-4283],[-2171,-4306],[-2208,-4322],[-2307,-4362],[-2368,-4386],[-2402,-4400],[-2526,-4452],[-2668,-4510],[-2727,-4535],[-2811,-4569],[-2855,-4588],[-2967,-4636],[-3199,-4734],[-3384,-4812],[-3439,-4834],[-3477,-4851],[-3528,-4873],[-3548,-4933],[-3561,-4969],[-3569,-5008],[-3572,-5047],[-3568,-5104],[-3578,-5141],[-3597,-5203],[-3613,-5256],[-3628,-5322],[-3646,-5383],[-3664,-5442],[-3680,-5497],[-3696,-5554],[-3711,-5607],[-3727,-5662],[-3744,-5718],[-3763,-5781],[-3779,-5833],[-3810,-5946],[-3826,-5999],[-3845,-6071],[-3859,-6117],[-3878,-6186],[-3894,-6240],[-3908,-6290],[-3922,-6336],[-3942,-6406],[-3960,-6465],[-3973,-6509],[-3992,-6565],[-4005,-6609],[-4028,-6683],[-4043,-6734],[-4061,-6792],[-4074,-6834],[-4094,-6899],[-4110,-6951],[-4124,-7008],[-4140,-7058],[-4152,-7111],[-4202,-7292],[-4211,-7324],[-4222,-7360],[-4235,-7401],[-4260,-7480],[-4274,-7526],[-4284,-7564],[-4295,-7598],[-4307,-7641],[-4318,-7683],[-4328,-7728],[-4347,-7804],[-4363,-7857],[-4377,-7907],[-4242,-7957],[-4032,-8014],[-3949,-8036],[-3844,-8069],[-3797,-8083],[-3725,-8106],[-3605,-8138],[-3388,-8199],[-3332,-8203],[-3302,-8207],[-3257,-8213],[-3198,-8207],[-3163,-8220]];
+const KIN_B=[[0,0],[19,32],[44,71],[122,197],[55,269],[14,297],[-104,367],[-189,422],[-279,480],[-454,594],[-603,690],[-724,768],[-757,789],[-906,886],[-1099,1012],[-1241,1104],[-1386,1197],[-1443,1234],[-1566,1315],[-1627,1355],[-1725,1418],[-1816,1478],[-1907,1535],[-1979,1581],[-2031,1615],[-2062,1635],[-2097,1657],[-2160,1696],[-2196,1716],[-2254,1747],[-2291,1765],[-2335,1785],[-2402,1813],[-2452,1833],[-2498,1849],[-2557,1868],[-2591,1877],[-2634,1889],[-2695,1902],[-2744,1913],[-2804,1926],[-2860,1933],[-2939,1941],[-3009,1948],[-3096,1952],[-3190,1956],[-3276,1951],[-3321,1948],[-3372,1942],[-3418,1937],[-3455,1931],[-3509,1921],[-3548,1914],[-3591,1905],[-3638,1890],[-3697,1878],[-3754,1863],[-3813,1842],[-3878,1817],[-3965,1779],[-4078,1739],[-4185,1697],[-4292,1657],[-4389,1621],[-4476,1588],[-4530,1568],[-4581,1548],[-4622,1530],[-4660,1517],[-4699,1501],[-4735,1488],[-4774,1474],[-4839,1449],[-4886,1431],[-4944,1409],[-5027,1377],[-5127,1339],[-5233,1296],[-5356,1251],[-5417,1232],[-5452,1216],[-5784,1085],[-5876,1049],[-5940,1024],[-6054,986],[-6154,948],[-6339,874],[-6398,850],[-6440,835],[-6482,818],[-6553,791],[-6630,759],[-6664,746],[-6836,683],[-6876,668],[-7026,611],[-7065,596],[-7429,459],[-7467,444],[-7528,419],[-7675,364],[-7749,335],[-7802,315],[-7842,300],[-7918,271],[-7957,257],[-7996,239],[-8082,207],[-8185,169],[-8286,129],[-8431,74],[-8499,47],[-8746,-42],[-8842,-77],[-8888,-93],[-8950,-117],[-8992,-135],[-9289,-254],[-9387,-291],[-9533,-344],[-9706,-411],[-9745,-427],[-9842,-464],[-9919,-492],[-9992,-519],[-10077,-550],[-10189,-592],[-10484,-710],[-10526,-727],[-10623,-778],[-10661,-801],[-10776,-876],[-10820,-915],[-10867,-963],[-10912,-1021],[-10939,-1063],[-10984,-1163],[-11022,-1284],[-11037,-1330],[-11059,-1384],[-11083,-1429],[-11107,-1477]];
+const KIN_C=[[0,0],[-47,20],[-79,38],[-116,59],[-330,117],[-446,150],[-459,93],[-497,103],[-551,95],[-686,60],[-811,24],[-850,14],[-895,-4],[-939,16],[-1024,53],[-1082,76],[-1185,117],[-1257,146],[-1363,186],[-1435,213],[-1485,232],[-1530,249],[-1586,271],[-1683,310],[-1774,343],[-1818,357],[-1879,377],[-1924,385],[-2001,390],[-2086,396],[-2132,399],[-2292,408],[-2366,414],[-2402,430],[-2452,462],[-2486,487],[-2561,535],[-2718,637],[-2866,730],[-2958,789],[-3044,847],[-3093,879],[-3175,931],[-3205,950],[-3272,843],[-3332,747],[-3388,657],[-3423,609],[-3468,557],[-3498,531],[-3552,491],[-3586,469],[-3620,450],[-3697,414],[-3745,396],[-3813,374],[-3877,360],[-3952,355],[-4016,358],[-4053,363],[-4099,368],[-4139,373],[-4176,384],[-4279,434],[-4341,477],[-4403,528],[-4452,584],[-4515,666],[-4687,910],[-4852,1143],[-4794,1189],[-4756,1216],[-4715,1248],[-4629,1310],[-4479,1419],[-4440,1450],[-4409,1480],[-4365,1534],[-4290,1649],[-4228,1747],[-4266,1799],[-4322,1846],[-4495,2009],[-4538,2045],[-4633,2122],[-4694,2169],[-4842,2284],[-4883,2315],[-4929,2352],[-5052,2448],[-5154,2528],[-5193,2559],[-5196,2594],[-5219,2646],[-5257,2680],[-5279,2717],[-5281,2758]];
 const CITIES={
  kinshasa:{name:'Kinshasa',country:'RDC',moto:'wewa',cur:'FC',rate:1,real:true,scale:.6,unit:'m',taxi:0xf2c230,bus:[0xf4f4f0,0x0a6ed1],sky:[0x4f86c6,0xf3c9a0],
   wp:KIN_WP,downtown:9300,
@@ -199,7 +219,16 @@ const CITIES={
     bridges:[600,1500,2450,3400,4300],markets:[[5450,5950,'MATONGE'],[8420,8820,'ZANDO · GRAND MARCHÉ']],flags30:9458},
   ads:[['SANGONEWS','L\'actu du Congo chaque jour · YouTube & TikTok','#ce1126','#ffffff'],['WENZE','Fierté congolaise · T-shirts & casquettes','#0a6ed1','#ffffff'],
     ['TA PUB ICI','Ton enseigne vue par chaque joueur','#f2c230','#17191e'],['SANGONEWS','Abonne-toi : @SangoNews','#17191e','#f2c230'],['PONDU EXPRESS','Le vrai goût de la maison','#1f8a4c','#ffffff'],
-    ['MOTO MBOKA','Le jeu des wewa de Kinshasa','#2e9e5b','#ffffff'],['LILATEMI','Beauté & bien-être · lilatemi.com','#8b3fb5','#ffffff'],['MBOKA CRÉDIT','Ton épargne en sécurité','#0a3a7a','#ffffff']]},
+    ['MOTO MBOKA','Le jeu des wewa de Kinshasa','#2e9e5b','#ffffff'],['LILATEMI','Beauté & bien-être · lilatemi.com','#8b3fb5','#ffffff'],['MBOKA CRÉDIT','Ton épargne en sécurité','#0a3a7a','#ffffff']],
+  routes:[{rname:'Échangeur → Gare Centrale'},
+   {rname:'Aéroport → Échangeur',wp:KIN_B,scale:.5,downtown:1e9,
+    streets:[[0,'Boulevard Lumumba','N\'djili'],[3000,'Boulevard Lumumba','Masina'],[7000,'Boulevard Lumumba','Masina · Liberté'],[9500,'Boulevard Lumumba','Kingabwa · Limete'],[12300,'Pont Matete','Limete']],
+    stops:[['Aéroport de N\'djili',150],['Quartier 1 · N\'djili',2200],['Masina · Sans Fil',4500],['Petro-Congo',6300],['Marché de la Liberté',8150],['Kingabwa',10200],['Pont Matete',12000],['Échangeur de Limete',12800]],
+    landmarks:{tower:[12600,-72],bridges:[1500,3600,5600,9300,11000],markets:[[7900,8450,'MARCHÉ DE LA LIBERTÉ']],flags30:1e9}},
+   {rname:'Gare Centrale → Kintambo',wp:KIN_C,scale:.6,downtown:0,
+    streets:[[0,'Boulevard du 30 Juin','Gombe'],[935,'Avenue Colonel Lukusa','Gombe'],[2528,'Avenue de la Justice','Gombe'],[3524,'Avenue Kisangani','Gombe'],[3869,'Boulevard du Colonel Tshatshi','Gombe · Ngaliema'],[5791,'Avenue des Batetela','Gombe'],[6671,'Boulevard du 30 Juin','Gombe'],[7102,'Saut-de-Mouton','Kintambo'],[7489,'Avenue Colonel Mondjiba','Ngaliema']],
+    stops:[['Gare Centrale',100],['Place du 27 Octobre',520],['Avenue de la Justice',2600],['Rond-point Mandela',3500],['Palais de la Nation',4560],['Pullman Grand Hôtel',5880],['Saut-de-Mouton',7100],['Kintambo Magasin',8250]],
+    landmarks:{sozacom:[300,1],nation:[4596,1],pullman:[5911,1],flags30:0}}]},
  abidjan:{name:'Abidjan',country:'Côte d’Ivoire',moto:'moto-taxi',cur:'FCFA',rate:0.25,taxi:0xf28c28,bus:[0x2e9e5b,0xf2c230],sky:[0x5a8fcf,0xf0c79a],
   wp:[[0,0],[-60,-400],[-60,-800],[140,-1150],[300,-1500],[300,-1950],[120,-2300],[-80,-2650],[-80,-3100],[100,-3500]],downtown:.78,
   streets:[[0,'Boulevard de Marseille'],[0.3,'Boulevard VGE'],[0.55,'Pont Houphouët-Boigny'],[0.75,'Boulevard de la République']],
@@ -282,6 +311,12 @@ function instPeople(list){PEOPLE.forEach((k,ki)=>{const sub=list.filter((_,i)=>i
     sub.forEach((q,i)=>{d.position.copy(q);d.rotation.set(0,rnd(0,6.28),0);d.scale.setScalar(rnd(.92,1.06));d.updateMatrix();m.multiplyMatrices(d.matrix,o.matrixWorld);im.setMatrixAt(i,m);});
     im.castShadow=false;im.receiveShadow=true;world.add(im);});});}
 
+const ARROW=new THREE.ConeGeometry(1.6,3.2,4).rotateX(Math.PI);const BEAM=new THREE.CylinderGeometry(1.1,1.6,60,16,1,true).translate(0,30,0);
+function beacon(col){const g=new THREE.Group();
+  const beam=new THREE.Mesh(BEAM,new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.28,side:THREE.DoubleSide,depthWrite:false,fog:false,blending:THREE.AdditiveBlending}));
+  const arrow=new THREE.Mesh(ARROW,new THREE.MeshBasicMaterial({color:col,fog:false,depthTest:false}));arrow.position.y=9;arrow.renderOrder=10;
+  const ring=new THREE.Mesh(new THREE.RingGeometry(2.2,3,32).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.8,side:THREE.DoubleSide,depthWrite:false}));ring.position.y=.3;
+  g.add(beam,arrow,ring);g.userData.arrow=arrow;g.userData.ring=ring;return g;}
 function buildWorld(){
   world.traverse(o=>{if(o.geometry&&o.geometry!==PALM&&o.geometry!==LAMP&&!o.geometry.userData.keep)o.geometry.dispose();});world.clear();
   skyMat.uniforms.top.value.setHex(CITY.sky[0]);skyMat.uniforms.hor.value.setHex(CITY.sky[1]);scene.fog.color.setHex(CITY.sky[1]);
@@ -353,8 +388,8 @@ function buildWorld(){
     const umb=new THREE.Mesh(new THREE.ConeGeometry(1.6,.7,10),new THREE.MeshStandardMaterial({color:pick([0xce1126,0x2e9e5b,0xf28c28,0x0a6ed1])}));place(umb,st.s+9,WALK0+3,2.4);umb.castShadow=true;world.add(umb);
     const tab=new THREE.Mesh(new THREE.BoxGeometry(1.4,.8,.8),new THREE.MeshStandardMaterial({color:0x8a6a4a}));place(tab,st.s+9,WALK0+3,.62);world.add(tab);
     st.waitObj=person();place(st.waitObj,st.s,WALK0+.9,.22,true);st.waitObj.rotation.y-=Math.PI/2;world.add(st.waitObj);
-    st.mark=new THREE.Mesh(new THREE.ConeGeometry(.6,1.2,4),new THREE.MeshBasicMaterial({color:0xf2c230}));st.mark.rotation.x=Math.PI;place(st.mark,st.s,WALK0+.9,3.3);world.add(st.mark);
-    st.dest=new THREE.Mesh(new THREE.CylinderGeometry(2.4,2.4,12,20,1,true),new THREE.MeshBasicMaterial({color:0x2ee06b,transparent:true,opacity:.3,side:THREE.DoubleSide,depthWrite:false}));place(st.dest,st.s,ROAD_H-1.9,6);st.dest.visible=false;world.add(st.dest);
+    st.mark=beacon(0xf2c230);place(st.mark,st.s,WALK0+.9,0);world.add(st.mark);
+    st.dest=beacon(0x2ee06b);place(st.dest,st.s,ROAD_H-1.9,0);st.dest.visible=false;world.add(st.dest);
   });
   // arrivée
   const fin=new THREE.Group();{const b=new THREE.Mesh(new THREE.PlaneGeometry(26,3),new THREE.MeshBasicMaterial({map:signTex('ARRIVÉE',STOPS[STOPS.length-1].name,'#ce1126','#ffffff',26,3),side:THREE.DoubleSide}));b.position.y=9;
@@ -389,6 +424,8 @@ function planPlaces(){EXCL=[];const lm=CITY.landmarks||{};const fs=v=>toU(v)*L;c
   if(lm.onatra)out.push({key:'onatra',p:real(lm.onatra,80),r:80});
   if(lm.gare)out.push({key:'gare',p:worldAt(L-70,WALK1+30).setY(0),r:28});
   if(lm.rtnc)out.push({key:'rtnc',p:real(lm.rtnc,20),r:20});
+  if(lm.nation)out.push({key:'nation',p:real(lm.nation,45),r:45});
+  if(lm.pullman)out.push({key:'pullman',p:real(lm.pullman,25),r:25});
   if(lm.fikin)out.push({key:'fikin',p:real(lm.fikin,62),r:62});
   if(lm.musee)out.push({key:'musee',p:real(lm.musee,28),r:28});
   out.forEach(o=>{o.ry=o.fixedRy!==undefined?o.fixedRy:facing(o.p);EXCL.push([o.p,o.r+14]);if(o.key==='tower')EXCL.push([o.p.clone().add(new THREE.Vector3(70,0,0).applyAxisAngle(new THREE.Vector3(0,1,0),o.ry)),40]);});
@@ -415,17 +452,19 @@ function river(){const lm=CITY.landmarks||{};if(lm.riverZ===undefined)return;con
   bz.push({p:new THREE.Vector3(cx+300,55,z0-1350),sc:new THREE.Vector3(26,110,26),c:0xd8dee4});inst(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({roughness:.8}),bz,false);}
 function landmarks(places){river();const lm=CITY.landmarks||{};const fs=v=>toU(v)*L;
   const SIGNS={tata:['STADE TATA RAPHAËL','Ministère de la Jeunesse et des Sports','#17191e','#f2c230',40,2.2],onatra:['ONATRA','Office National des Transports','#ffffff','#0a3a7a',30,4],rtnc:['RTNC','Radio-Télévision Nationale Congolaise','#ffffff','#0a3a7a',18,3],fikin:['FIKIN','Foire Internationale de Kinshasa','#0a6ed1','#ffffff',36,3]};
-  places.forEach(o=>{if(o.key==='hotel')hotelBuilding(o.p,o.ry);else if(o.key==='musee')simpleBuilding(o.p,o.ry,50,16,30,0x3a5a7a,['MUSÉE NATIONAL','République Démocratique du Congo','#17191e','#f2c230']);
+  places.forEach(o=>{if(o.key==='nation')simpleBuilding(o.p,o.ry,80,16,40,0xf3efe6,['PALAIS DE LA NATION','Présidence de la République','#ffffff','#0a3a7a']);
+    else if(o.key==='pullman')simpleBuilding(o.p,o.ry,40,70,22,0x7d9bb5,['PULLMAN GRAND HÔTEL','Kinshasa','#17191e','#f2c230']);
+    else if(o.key==='hotel')hotelBuilding(o.p,o.ry);else if(o.key==='musee')simpleBuilding(o.p,o.ry,50,16,30,0x3a5a7a,['MUSÉE NATIONAL','République Démocratique du Congo','#17191e','#f2c230']);
     else{const m=addGLB(o.key,o.p,o.ry,o.sc);
     if(SIGNS[o.key]){const a=SIGNS[o.key];const sg=m.getObjectByName('sign');if(sg)sg.traverse(x=>{if(x.isMesh)x.material=new THREE.MeshBasicMaterial({map:signTex(a[0],a[1],a[2],a[3],a[4],a[5]),side:THREE.DoubleSide});});}
     m.traverse(x=>{if(!x.isMesh)return;const nm=x.material.name;
       if(nm==='flag'||x.name==='mural'||(x.parent&&x.parent.name==='mural')){x.material=new THREE.MeshStandardMaterial({map:T.flag,side:THREE.DoubleSide,roughness:.7});}
       if(nm==='banner'&&o.key==='martyrs'){x.material=new THREE.MeshBasicMaterial({map:T.strip,side:THREE.DoubleSide});}});}
-    const LBL={tata:'STADE TATA RAPHAËL',martyrs:'STADE DES MARTYRS',gare:'PLACE DE LA GARE',palais:'PALAIS DU PEUPLE',hotel:'HÔTEL DE VILLE',sozacom:'IMMEUBLE SOZACOM',onatra:'ONATRA',rtnc:'RTNC',fikin:'FIKIN',musee:'MUSÉE NATIONAL',tower:'TOUR DE L\'ÉCHANGEUR'}[o.key];
+    const LBL={nation:'PALAIS DE LA NATION',pullman:'PULLMAN GRAND HÔTEL',tata:'STADE TATA RAPHAËL',martyrs:'STADE DES MARTYRS',gare:'PLACE DE LA GARE',palais:'PALAIS DU PEUPLE',hotel:'HÔTEL DE VILLE',sozacom:'IMMEUBLE SOZACOM',onatra:'ONATRA',rtnc:'RTNC',fikin:'FIKIN',musee:'MUSÉE NATIONAL',tower:'TOUR DE L\'ÉCHANGEUR'}[o.key];
     if(LBL){const n=nearestRoad(o.p);const dir=new THREE.Vector3(n.p.x-o.p.x,0,n.p.z-o.p.z).normalize();const v=o.p.clone().addScaledVector(dir,Math.max(2,n.d-WALK1-2));
       const g=new THREE.Group();const pn=new THREE.Mesh(new THREE.PlaneGeometry(15,2.8),new THREE.MeshBasicMaterial({map:signTex(LBL,CITY.name,'#0a6ed1','#ffffff',15,2.8),side:THREE.DoubleSide}));pn.position.y=5.2;
       for(const px of [-7,7]){const pl=new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,5,6),M.metal);pl.position.set(px,2.5,0);g.add(pl);}g.add(pn);g.position.copy(v);g.rotation.y=Math.atan2(dir.x,dir.z);world.add(g);}
-    if(['palais','hotel','onatra','sozacom'].includes(o.key)){const fl=[];for(const dx of [-8,0,8]){const v=new THREE.Vector3(dx,0,o.r*.55+6).applyAxisAngle(new THREE.Vector3(0,1,0),o.ry).add(o.p);fl.push({p:v,ry:o.ry});}instGLB('flag',fl);}});
+    if(['palais','hotel','onatra','sozacom','nation'].includes(o.key)){const fl=[];for(const dx of [-8,0,8]){const v=new THREE.Vector3(dx,0,o.r*.55+6).applyAxisAngle(new THREE.Vector3(0,1,0),o.ry).add(o.p);fl.push({p:v,ry:o.ry});}instGLB('flag',fl);}});
   if(places.length&&places[0].key==='tower')CITY.introC=places[0].p.clone();
   // passerelles du boulevard Lumumba avec bandeaux publicitaires
   const ads=CITY.ads||[];
@@ -517,6 +556,13 @@ function audioInit(){if(ac)return;try{ac=new (window.AudioContext||window.webkit
 function beep(freqs){if(!ac)return;freqs.forEach((fq,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.type='square';o.frequency.value=fq;g.gain.setValueAtTime(.07,ac.currentTime+i*.09);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+i*.09+.12);o.connect(g);g.connect(ac.destination);o.start(ac.currentTime+i*.09);o.stop(ac.currentTime+i*.09+.14);});}
 
 /* ---------- HUD ---------- */
+const lblC=document.createElement('canvas');lblC.width=512;lblC.height=160;const lblT=new THREE.CanvasTexture(lblC);lblT.encoding=THREE.sRGBEncoding;
+const label=new THREE.Sprite(new THREE.SpriteMaterial({map:lblT,depthTest:false,fog:false}));label.scale.set(26,8.1,1);label.renderOrder=11;scene.add(label);
+const TGT={st:null};
+function drawLabel(txt,dist,col){const g=lblC.getContext('2d');g.clearRect(0,0,512,160);g.fillStyle=col;g.beginPath();g.roundRect?g.roundRect(6,6,500,120,18):g.rect(6,6,500,120);g.fill();
+  g.beginPath();g.moveTo(236,126);g.lineTo(256,156);g.lineTo(276,126);g.fill();g.fillStyle='#17191e';g.textAlign='center';
+  g.font='bold 40px Bungee, Arial Black, sans-serif';g.fillText(dist,256,62);g.font='bold 30px Archivo, Arial, sans-serif';g.fillText(txt,256,108,480);lblT.needsUpdate=true;}
+const fmtD=m=>m>=1000?(m/1000).toFixed(1).replace('.',',')+' km':Math.max(0,Math.round(m/10)*10)+' m';
 let toastT=0;function toast(t){const el=$('toast');el.textContent=t;el.style.opacity=1;toastT=1.6;}
 const fmt=t=>{const m=Math.floor(t/60),s=Math.floor(t%60);return m+':'+String(s).padStart(2,'0');};
 const fcFmt=n=>n.toLocaleString('fr-FR')+' '+CITY.cur;
@@ -558,7 +604,7 @@ function step(dt){
       else hint='Ralentis pour déposer le client';}}
   let m;if(S.carrying)m='Dépose ton client à : '+S.carrying.dest.name+' ('+Math.max(0,Math.round(S.carrying.dest.s-S.s))+' m)';
   else{const n=nextWaiting();m=n?'Client qui attend : '+n.name+' ('+Math.max(0,Math.round(n.s-S.s))+' m). Voie de droite.':'Fonce vers '+STOPS[STOPS.length-1].name+' !';}
-  $('mission').textContent=hint||m;$('mission').style.borderLeftColor=hint?'#ce1126':'#f2c230';
+  $('mission').textContent=hint||'';$('mission').style.visibility=hint?'visible':'hidden';$('mission').style.borderLeftColor='#ce1126';
   if(S.s>=L-25)finish();
 }
 function render(dt){
@@ -570,12 +616,22 @@ function render(dt){
   camera.position.copy(camPos);if(S.shake>0){S.shake-=dt;camera.position.x+=(Math.random()-.5)*S.shake;camera.position.y+=(Math.random()-.5)*S.shake;}
   camera.lookAt(camLook);const baseF=innerWidth<innerHeight?76:60;camera.fov+=((baseF+S.v*.25)-camera.fov)*Math.min(1,dt*3);camera.updateProjectionMatrix();
   sun.target.position.copy(player.position);sun.position.copy(player.position).addScaledVector(SUNDIR,180);sky.position.copy(camera.position);
-  const tt=performance.now()/400;STOPS.forEach(st=>{if(st.mark&&st.mark.visible)st.mark.position.y=3.3+Math.sin(tt)*.3;});
+  const tt=performance.now()/300;STOPS.forEach(st=>{for(const b of [st.mark,st.dest]){if(!b||!b.visible)continue;b.userData.arrow.position.y=9+Math.sin(tt)*1.2;b.userData.arrow.rotation.y+=dt*2;const k=1+.25*Math.sin(tt*1.5);b.userData.ring.scale.set(k,1,k);}});
+  if(TGT.st){const p=worldAt(TGT.st.s,TGT.st===(S.carrying&&S.carrying.dest)?ROAD_H-1.9:WALK0+.9);label.position.set(p.x,15.5+Math.sin(tt)*1.2,p.z);label.visible=true;}else label.visible=false;
   renderer.render(scene,camera);
 }
 function hud(){$('fc').textContent=fcFmt(S.fc);$('clients').textContent=S.clients+(S.clients>1?' clients':' client');$('time').textContent=fmt(S.t);
-  const[n,q,k]=streetAt(S.s);$('street').innerHTML=n+'<small>'+(q?q+' · ':'')+'Arrivée '+(Math.max(0,(L-S.s)/1000)).toFixed(1)+' km</small>';
-  $('speed').innerHTML=Math.round(S.v*2.6)+'<small>KM/H</small>';drawMini();}
+  const[n,q]=streetAt(S.s);$('street').innerHTML=n+'<small>'+(q||CITY.name)+'</small>';
+  $('speed').innerHTML=Math.round(S.v*2.6)+'<small>KM/H</small>';drawMini();
+  let st,kind;if(S.carrying){st=S.carrying.dest;kind='dest';}else{st=nextWaiting();kind='client';}TGT.st=st||null;
+  const left=L-S.s,el=$('target');
+  if(st){const d=st.s-S.s,col=kind==='dest'?'#2ee06b':'#f2c230',tot=kind==='dest'?Math.max(1,st.s-S.carrying.from):Math.max(1,st.s);
+    el.style.setProperty('--c',col);el.classList.toggle('near',d<120);
+    $('tIcon').textContent=kind==='dest'?'⬇':'✋';$('tKind').textContent=kind==='dest'?'Dépose ton client':'Client qui attend';
+    $('tName').textContent=st.name;$('tDist').textContent=d<15?'ICI':fmtD(d);$('tBar').style.width=Math.max(0,Math.min(100,(1-d/tot)*100))+'%';
+    drawLabel(kind==='dest'?'DÉPOSE ICI':'CLIENT ICI',d<15?'ICI':fmtD(d),col);}
+  else{el.style.setProperty('--c','#ce1126');el.classList.remove('near');$('tIcon').textContent='🏁';$('tKind').textContent='Direction';$('tName').textContent=STOPS[STOPS.length-1].name;$('tDist').textContent=fmtD(left);$('tBar').style.width=Math.min(100,S.s/L*100)+'%';}
+  $('tFinish').textContent='Arrivée '+STOPS[STOPS.length-1].name+' · '+fmtD(left);}
 let intro=0,hudT=0;
 function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
   if(S.running){step(dt);hudT-=dt;if(hudT<=0){hudT=.16;hud();}}
@@ -587,7 +643,7 @@ function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
   requestAnimationFrame(loop);}
 
 /* ---------- Écrans ---------- */
-const ui=['hud','mission','mini','speed','padL','padR','radio'];
+const ui=['hud','mission','mini','speed','padL','padR','radio','target'];
 const TRACKS=[['Congolais jusqu’à la mort','congolais-jusqua-la-mort.mp3'],['Jusqu’à quand ?','jusqua-quand.mp3'],['Malembe Malembe','malembe-malembe.mp3'],['Congolais Telema','congolais-telema.mp3']];
 let radioI=-1,radioSrc=null,radioGain=null,radioOn=false;const bufs={};
 const radio={get paused(){return !radioOn;}};
@@ -614,14 +670,16 @@ function finish(){S.running=false;S.v=0;ui.forEach(i=>$(i).hidden=true);
 $('play').onclick=start;$('again').onclick=start;
 $('share').onclick=()=>{const b=$('share');const done=()=>b.textContent='Score copié';
   if(navigator.clipboard)navigator.clipboard.writeText(lastMsg).then(done,()=>{$('eMsg').textContent=lastMsg;b.textContent='Sélectionne le texte';});else{$('eMsg').textContent=lastMsg;}};
-function setCity(key){CKEY=key;CITY=CITIES[key];loadRoute(CITY);buildWorld();buildTraffic();reset();
-  document.querySelectorAll('.city').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===key));
+let RI=0;
+function setCity(key,ri){RI=ri||0;const base=CITIES[key];CKEY=key+(base.routes?'_'+RI:'');CITY=Object.assign({},base,base.routes?base.routes[RI]:{});loadRoute(CITY);
+  const rb=$('routes');rb.innerHTML='';rb.hidden=!base.routes;(base.routes||[]).forEach((r,i)=>{const b=document.createElement('button');b.className='city';b.textContent=r.rname;b.setAttribute('aria-pressed',i===RI);b.onclick=()=>setCity(key,i);rb.appendChild(b);});buildWorld();buildTraffic();reset();
+  document.querySelectorAll('#cities .city').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===key));
   const first=STOPS[0].name,lastS=STOPS[STOPS.length-1].name;
   $('kick').textContent=CITY.moto+' · '+CITY.name+', '+CITY.country+(CITY.real?' · vraies rues':'');
-  $('intro').textContent='De '+first+' à '+lastS+(CITY.real?', par '+CITY.streets.slice(0,4).map(s=>s[1]).join(', ')+'.':'.')+' Ralentis à l’arrêt pour prendre un client, dépose-le au bon arrêt et encaisse tes '+CITY.cur+'.';
+  $('intro').textContent='De '+first+' à '+lastS+(CITY.real?', par '+[...new Set(CITY.streets.map(s=>s[1]))].slice(0,4).join(', ')+'.':'.')+' Ralentis à l’arrêt pour prendre un client, dépose-le au bon arrêt et encaisse tes '+CITY.cur+'.';
   $('endKick').textContent='Arrivée · '+lastS;showBest();
-  try{localStorage.setItem('mm_city',key);}catch(e){}}
-const cityBox=$('cities');Object.entries(CITIES).forEach(([k,c])=>{const b=document.createElement('button');b.className='city';b.dataset.k=k;b.textContent=c.name;b.onclick=()=>setCity(k);cityBox.appendChild(b);});
+  try{localStorage.setItem('mm_city',key);}catch(e){}CITY.introC=CITY.introC||null;}
+const cityBox=$('cities');Object.entries(CITIES).forEach(([k,c])=>{const b=document.createElement('button');b.className='city';b.dataset.k=k;b.textContent=c.name;b.onclick=()=>setCity(k,0);cityBox.appendChild(b);});
 let saved='kinshasa';try{const v=localStorage.getItem('mm_city');if(v&&CITIES[v])saved=v;}catch(e){}
 $('play').disabled=true;$('play').textContent='Chargement…';
 const loader=new THREE.GLTFLoader(),TPL={};
