@@ -659,7 +659,7 @@ const fmt=t=>{const m=Math.floor(t/60),s=Math.floor(t%60);return m+':'+String(s)
 const fcFmt=n=>n.toLocaleString('fr-FR')+' '+CITY.cur;
 const money=n=>Math.max(10,Math.round(n*CITY.rate/10)*10);
 function streetAt(s){let r=STREETS[0],k=1;STREETS.forEach((st,i)=>{if(s/L>=st[0]){r=st;k=i+1;}});return[r[1],r[2],k];}
-function nextWaiting(){return STOPS.find(st=>st.waiting&&st.s>S.s-10);}
+function nextWaiting(){return STOPS.find(st=>st.waiting&&st.s>S.s-60);}
 const mini=$('mini'),mg=mini.getContext('2d');let minX,maxX,minZ,maxZ,sc;
 function computeMini(){minX=minZ=1e9;maxX=maxZ=-1e9;P.forEach(p=>{minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x);minZ=Math.min(minZ,p.z);maxZ=Math.max(maxZ,p.z);});sc=180/Math.max(maxX-minX,maxZ-minZ);}
 const mp=p=>[20+(p.x-minX)*sc+(180-(maxX-minX)*sc)/2,20+(p.z-minZ)*sc+(180-(maxZ-minZ)*sc)/2];
@@ -672,25 +672,27 @@ const MAXV=38;let last=performance.now();const camPos=new THREE.Vector3(),camLoo
 function step(dt){
   const gas=keys.ArrowUp||keys.w||keys.z||touch.g, brk=keys.ArrowDown||keys.s||touch.b;
   const st=(keys.ArrowRight||keys.d||touch.r?1:0)-(keys.ArrowLeft||keys.a||keys.q||touch.l?1:0);
-  S.v+=(gas?15:0)*dt-(brk?55:0)*dt-(S.v*0.05+1)*dt*(gas?0.2:1);S.v=Math.max(0,Math.min(MAXV,S.v));
+  if(brk&&!gas&&S.v<=0.6){S.v=Math.max(-5,S.v-7*dt);S.rev=true;}   // marche arrière : rester appuyé sur FREIN à l'arrêt
+  else if(S.v<0){S.v=Math.min(0,S.v+(gas?20:6)*dt);S.rev=S.v<0;}
+  else{S.rev=false;S.v+=(gas?15:0)*dt-(brk?55:0)*dt-(S.v*0.05+1)*dt*(gas?0.2:1);S.v=Math.max(0,Math.min(MAXV,S.v));}
   S.steer+=(st-S.steer)*Math.min(1,dt*9);const latMax=2.5+S.v*.2;S.vx+=(S.steer*latMax-S.vx)*Math.min(1,dt*6);S.x+=S.vx*dt;
   if(S.x<2.3){S.x=2.3;S.vx=Math.max(0,S.vx);}if(S.x>12.2){S.x=12.2;S.vx=Math.min(0,S.vx);}
-  S.s+=S.v*dt;S.t+=dt;if(S.crashCool>0)S.crashCool-=dt;
+  S.s=Math.max(4,S.s+S.v*dt);S.t+=dt;if(S.crashCool>0)S.crashCool-=dt;
   for(const c of traffic){let lim=c.v0||c.v;
     for(const o of traffic){if(o===c||o.x!==c.x)continue;const gap=(o.s-c.s)*c.dir-(o.len+c.len)/2;if(gap>0&&gap<14)lim=Math.min(lim,o.v*(gap<4?.5:1));}
-    if(c.dir>0&&Math.abs(c.x-S.x)<1.8){const gap=S.s-c.s-(c.len/2+1);if(gap>0&&gap<12)lim=Math.min(lim,S.v*.9);}
+    if(c.dir>0&&Math.abs(c.x-S.x)<1.8){const gap=S.s-c.s-(c.len/2+1);if(gap>0&&gap<12)lim=Math.min(lim,Math.max(0,S.v)*.9);}
     c.v+=(lim-c.v)*Math.min(1,dt*3);c.s+=c.v*c.dir*dt;if(c.s<S.s-60||c.s>S.s+600)spawnCar(c,220);
     // évite de rentrer dans la voiture de devant (même voie)
     if(S.crashCool<=0&&c.dir>0&&Math.abs(c.s-S.s)<c.len/2+.9&&Math.abs(c.x-S.x)<(c.len<3?.9:1.6)){S.crashCool=1.5;S.v*=.4;S.shake=.6;const pen=money(150);S.fc=Math.max(0,S.fc-pen);toast('Aïe ! −'+fcFmt(pen));beep([180,120]);
       if(S.carrying){toast('Client perdu ! −'+fcFmt(pen));S.carrying.dest.visible=false;S.carrying=null;passenger.visible=false;}}
     place(c.mesh,c.s,c.x,0,c.dir<0);if(c.mesh.userData.wheels)c.mesh.userData.wheels.forEach(w=>w.rotation.x-=c.v*dt/.33);}
-  let hint='';{const tg=S.carrying?S.carrying.dest:nextWaiting();if(tg){const d=tg.s-S.s;if(d>0&&d<90&&S.v>=15)hint='Freine ! '+(S.carrying?'Dépose ton client':'Ton client est là')+' dans '+Math.round(d)+' m';else if(d>-14&&d<60&&S.x<=5.4)hint='Serre à droite pour '+(S.carrying?'déposer':'prendre')+' le client';}}
+  let hint='';{const tg=S.carrying?S.carrying.dest:nextWaiting();if(tg){const d=tg.s-S.s;if(d>0&&d<90&&S.v>=15)hint='Freine ! '+(S.carrying?'Dépose ton client':'Ton client est là')+' dans '+Math.round(d)+' m';else if(d<=-14&&d>-60&&S.v<12)hint='Trop loin ! Reste appuyé sur FREIN pour reculer';else if(d>-14&&d<60&&S.x<=5.4)hint='Serre à droite pour '+(S.carrying?'déposer':'prendre')+' le client';}}
   for(const stp of STOPS){const near=stp.s-S.s<22&&stp.s-S.s>-14&&S.x>5.4;
-    if(!S.carrying&&stp.waiting&&near){if(S.v<15){stp.waiting=false;stp.waitObj.visible=stp.mark.visible=false;
+    if(!S.carrying&&stp.waiting&&near){if(Math.abs(S.v)<15){stp.waiting=false;stp.waitObj.visible=stp.mark.visible=false;
         const idx=STOPS.indexOf(stp),cands=STOPS.filter((d,j)=>j>idx&&j<=idx+3);const d=cands[(Math.random()*cands.length)|0]||STOPS[STOPS.length-1];
         S.carrying={dest:d,from:stp.s,pick:S.t};d.dest.visible=true;passenger.visible=true;toast('Client à bord !');beep([520,780]);}
       else hint='Ralentis pour prendre le client';}
-    if(S.carrying&&S.carrying.dest===stp&&near){if(S.v<15){const dist=stp.s-S.carrying.from,dur=S.t-S.carrying.pick;
+    if(S.carrying&&S.carrying.dest===stp&&near){if(Math.abs(S.v)<15){const dist=stp.s-S.carrying.from,dur=S.t-S.carrying.pick;
         const fare=money(300+dist*0.9+Math.max(0,dist/22-dur)*40);S.fc+=fare;S.clients++;stp.dest.visible=false;S.carrying=null;passenger.visible=false;toast('+'+fcFmt(fare));beep([660,880,1320]);}
       else hint='Ralentis pour déposer le client';}}
   let m;if(S.carrying)m='Dépose ton client à : '+S.carrying.dest.name+' ('+Math.max(0,Math.round(S.carrying.dest.s-S.s))+' m)';
@@ -714,7 +716,7 @@ function render(dt){
 }
 function hud(){$('fc').textContent=fcFmt(S.fc);$('clients').textContent=S.clients+(S.clients>1?' clients':' client');$('time').textContent=fmt(S.t);
   const[n,q]=streetAt(S.s);$('street').innerHTML=n+'<small>'+(q||CITY.name)+'</small>';
-  $('speed').innerHTML=Math.round(S.v*2.6)+'<small>KM/H</small>';drawMini();
+  $('speed').innerHTML=(S.v<-.05?'<span style="color:#f2c230">R</span> ':'')+Math.round(Math.abs(S.v)*2.6)+'<small>'+(S.v<-.05?'MARCHE ARRIÈRE':'KM/H')+'</small>';drawMini();
   let st,kind;if(S.carrying){st=S.carrying.dest;kind='dest';}else{st=nextWaiting();kind='client';}TGT.st=st||null;
   const left=L-S.s,el=$('target');
   if(st){const d=st.s-S.s,col=kind==='dest'?'#2ee06b':'#f2c230',tot=kind==='dest'?Math.max(1,st.s-S.carrying.from):Math.max(1,st.s);
