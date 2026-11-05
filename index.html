@@ -178,6 +178,35 @@ a.ghost{display:inline-flex;align-items:center;justify-content:center;text-decor
 #eStars{font-size:15px}#eStars .big{font-size:34px;color:var(--taxi);letter-spacing:.1em}#gBank{font-size:17px}#gBank b{color:var(--taxi)}
 .up{display:flex;align-items:center;gap:10px;background:#22252c;border:2px solid #444;padding:8px 10px;margin-bottom:6px}.up span{flex:1;display:flex;flex-direction:column}.up span small{font-size:11px;opacity:.8}.up i{font-style:normal;color:var(--taxi);letter-spacing:2px}
 .up .buy{padding:8px 10px;font-size:13px}.up .buy:disabled{opacity:.4}.up em{font-style:normal;color:#2ee06b;font-weight:800}
+
+/* v1.0.1 : lisibilité téléphone (retours iPhone) */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.pad.l button{color:#fff!important;font-family:Arial,sans-serif!important}
+#pause{pointer-events:auto;flex:none;margin-left:auto;width:44px;height:44px;background:var(--asphalt);color:var(--taxi);border:2px solid var(--taxi);box-shadow:2px 2px 0 var(--rouge);font:400 18px var(--display);cursor:pointer;touch-action:manipulation}
+#pauseScr{z-index:40}
+@media (orientation:portrait) and (max-width:520px){
+  .street{max-width:34vw!important;font-size:11px!important;padding:2px 8px!important}.street small{font-size:9px!important}
+  .plate b{font-size:17px!important}.plate small{font-size:9px!important}.plate{padding:4px 8px!important}
+  #target{top:calc(78px + env(safe-area-inset-top,0px))!important;bottom:auto!important;width:94vw!important;padding:4px 10px 8px!important;gap:8px!important;border-width:2px!important}
+  #target #tIcon{width:30px!important;height:30px!important;font-size:16px!important}
+  #target b{font-size:15px!important}#target small{font-size:9px!important}#target i{font-size:9px!important}#target strong{font-size:22px!important}
+  #radio{top:calc(146px + env(safe-area-inset-top,0px))!important;bottom:auto!important;font-size:11px!important;padding:4px 8px!important;max-width:52vw!important}
+  #fx{top:calc(146px + env(safe-area-inset-top,0px))!important}
+  #mission{top:auto!important;bottom:calc(296px + env(safe-area-inset-bottom,0px))!important;font-size:12px!important;max-width:80vw!important}
+  #mini{width:76px!important;height:76px!important;bottom:calc(196px + env(safe-area-inset-bottom,0px))!important}
+  #speed{bottom:calc(196px + env(safe-area-inset-bottom,0px))!important;font-size:26px!important;background:rgba(23,25,30,.6);padding:2px 8px}
+  .pad button.brk{font-size:14px!important}.pad button.horn{font-size:13px!important;width:92px!important}
+}
+@media (max-height:520px) and (orientation:landscape){
+  .street{display:none!important}
+  #pause{width:38px;height:38px;font-size:15px}
+  #target{top:calc(6px + env(safe-area-inset-top,0px))!important;width:min(40vw,360px)!important;padding:3px 8px 6px!important}
+  #target b{font-size:13px!important}#target strong{font-size:18px!important}#target #tIcon{width:24px!important;height:24px!important;font-size:13px!important}
+  #radio{top:calc(84px + env(safe-area-inset-top,0px))!important;font-size:10px!important;max-width:26vw!important}
+  #mini{width:62px!important;height:62px!important;bottom:calc(104px + env(safe-area-inset-bottom,0px))!important}
+  #speed{top:calc(64px + env(safe-area-inset-top,0px))!important;bottom:auto!important;font-size:20px!important}
+  #fx{top:calc(116px + env(safe-area-inset-top,0px))!important}
+}
 </style>
 
 <canvas id="c"></canvas>
@@ -185,6 +214,7 @@ a.ghost{display:inline-flex;align-items:center;justify-content:center;text-decor
 <div class="hud" id="hud" hidden>
   <div class="plate"><b id="fc">0 FC</b><small id="clients">0 client</small><span id="fuel">⛽<i><em id="fuelB"></em></i></span></div>
   <div class="street" id="street">Boulevard Lumumba<small>Tronçon 1</small></div>
+  <button id="pause" aria-label="Pause">II</button>
   <div class="plate" style="text-align:right"><b id="time">0:00</b><small>chrono</small></div>
 </div>
 <div id="mission" hidden></div>
@@ -194,7 +224,7 @@ a.ghost{display:inline-flex;align-items:center;justify-content:center;text-decor
 <canvas id="mini" width="220" height="220" hidden></canvas>
 <button id="radio" hidden aria-label="Changer de musique">♪ Radio</button>
 <div id="speed" hidden>0<small>KM/H</small></div>
-<div class="pad l" id="padL" hidden><button id="bL" aria-label="Gauche">◀</button><button id="bR" aria-label="Droite">▶</button></div>
+<div class="pad l" id="padL" hidden><button id="bL" aria-label="Gauche">◀&#xFE0E;</button><button id="bR" aria-label="Droite">▶&#xFE0E;</button></div>
 <div class="pad r" id="padR" hidden><button id="bH" class="horn" aria-label="Klaxon"><span>KLAXON</span></button><button id="bB" class="brk" aria-label="Freiner">FREIN</button><button id="bG" class="gas" aria-label="Accélérer">GAZ</button></div>
 
 <div class="screen home" id="start">
@@ -230,6 +260,15 @@ a.ghost{display:inline-flex;align-items:center;justify-content:center;text-decor
     <p class="fine" id="gWenze"></p>
     <p class="fine">Chaque course verse tes FC à la banque. Dépense-les ici.</p>
     <div class="row"><button class="cta" id="gClose">OK</button></div>
+  </div>
+</div>
+
+<div class="screen" id="pauseScr" hidden>
+  <div class="card">
+    <span class="kicker">Pause</span>
+    <h1>Jeu en <span>pause</span></h1>
+    <div class="row"><button class="cta" id="resume">▶&#xFE0E; Reprendre</button><button class="ghost" id="quit">🏠 Accueil</button></div>
+    <p class="fine">Si tu retournes à l'accueil, la course en cours est abandonnée (rien n'est gagné).</p>
   </div>
 </div>
 
@@ -893,6 +932,8 @@ function starsFor(){if(S.express)return S.fc>=money(8000)?3:S.fc>=money(5000)?2:
 function setMode(m){PROF.mode=m;saveProf();document.querySelectorAll('#modes .mode').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));showBest();}
 document.querySelectorAll('#modes .mode').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
 function refreshRoutes(){document.querySelectorAll('#routes .city').forEach((b,i)=>{const lk=routeLocked(i),e=b.querySelector('em.st');b.classList.toggle('lock',lk);if(e)e.textContent=lk?'🔒 2★ sur le circuit '+i:starStr(Math.max(PROF.stars['kinshasa_'+i]||0,PROF.stars['kinshasa_'+i+'_x']||0));});}
+function fxClean(){FX.rainT=FX.nightT=0;FX.rainK=FX.nightK=0;fxEnv();if(FX.convoy)endConvoy();if(sirG)sirG.gain.value=0;if(rainG)rainG.gain.value=0;
+  aura.visible=shieldS.visible=hyperS.visible=false;FX.flames.forEach(f=>{f.life=0;f.sp.visible=false;});}
 function fxFinish(){const xpRun=S.clients*20+S.rep*10+S.convOk*15+S.mayele*5+Math.floor(S.fc/100);const g0=gradeOf(PROF.xp);let msg='+'+xpRun+' XP';
   PROF.bank+=S.fc;const st=starsFor(),sk=CKEY+(S.express?'_x':''),old=PROF.stars[sk]||0;if(st>old)PROF.stars[sk]=st;
   $('eStars').innerHTML='<span class="big">'+starStr(st)+'</span>'+(st>old?' Nouveau record d\'étoiles !':'')+'<br><small>'+(S.express?'Express : ★ 2 500 · ★★ 5 000 · ★★★ 8 000 FC':'★ arrivée · ★★ 12 000 FC · ★★★ 20 000 FC et 1 accident max')+'</small><br>💰 +'+fmtFC(S.fc)+' à la banque (total '+fmtFC(PROF.bank)+') · dépense-les au Garage';
@@ -901,8 +942,7 @@ function fxFinish(){const xpRun=S.clients*20+S.rep*10+S.convOk*15+S.mayele*5+Mat
   PROF.xp+=xpRun;PROF.runs++;const g1=gradeOf(PROF.xp);if(g1>g0)msg+=' · 🏅 NOUVEAU GRADE : '+GRADES[g1][1]+' !';
   let wk={};try{wk=JSON.parse(localStorage.getItem('mm_week_'+CKEY)||'{}');}catch(e){}if(wk.wk!==WEEK||S.fc>wk.fc){wk={wk:WEEK,fc:S.fc};try{localStorage.setItem('mm_week_'+CKEY,JSON.stringify(wk));}catch(e){}}
   saveProf();$('eXp').innerHTML=msg+'<br><small>Grade : '+GRADES[g1][1]+' · Meilleur de la semaine : '+fcFmt(wk.fc)+'</small>';
-  FX.rainT=FX.nightT=0;FX.rainK=FX.nightK=0;fxEnv();if(FX.convoy)endConvoy();if(sirG)sirG.gain.value=0;if(rainG)rainG.gain.value=0;
-  aura.visible=shieldS.visible=hyperS.visible=false;FX.flames.forEach(f=>{f.life=0;f.sp.visible=false;});fxHome();return GRADES[g1][1];}
+  fxClean();fxHome();return GRADES[g1][1];}
 $('garageBtn').onclick=openGarage;$('gClose').onclick=()=>{$('garage').hidden=true;};
 fxHome();
 
@@ -951,7 +991,7 @@ function render(dt){
   sun.target.position.copy(player.position);sun.position.copy(player.position).addScaledVector(SUNDIR,180);sky.position.copy(camera.position);
   const tt=performance.now()/300;STOPS.forEach(st=>{for(const b of [st.mark,st.dest]){if(!b||!b.visible)continue;b.userData.arrow.position.y=9+Math.sin(tt)*1.2;b.userData.arrow.rotation.y+=dt*2;const k=1+.25*Math.sin(tt*1.5);b.userData.ring.scale.set(k,1,k);}});
   if(TGT.st){const p=worldAt(TGT.st.s,TGT.st===(S.carrying&&S.carrying.dest)?ROAD_H-1.9:WALK0+.9);label.position.set(p.x,15.5+Math.sin(tt)*1.2,p.z);label.visible=true;}else label.visible=false;
-  fxRender(dt);renderer.render(scene,camera);
+  fxRender(dt);{const P_=innerWidth<innerHeight;label.scale.set(P_?17:26,P_?5.3:8.1,1);}renderer.render(scene,camera);
 }
 function hud(){$('fc').textContent=fcFmt(S.fc);$('clients').textContent=S.clients+(S.clients>1?' clients':' client');$('time').textContent=S.express?fmt(Math.max(0,90-S.t)):fmt(S.t);$('time').style.color=S.express&&S.t>75?'#ff5a5a':'';
   const[n,q]=streetAt(S.s);$('street').innerHTML=n+'<small>'+(q||CITY.name)+'</small>';
@@ -967,7 +1007,7 @@ function hud(){$('fc').textContent=fcFmt(S.fc);$('clients').textContent=S.client
   $('tFinish').textContent='Arrivée '+STOPS[STOPS.length-1].name+' · '+fmtD(left);}
 let intro=0,hudT=0;
 function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
-  if(S.running){step(dt);hudT-=dt;if(hudT<=0){hudT=.16;hud();}}
+  if(S.running){if(!S.paused){step(dt);hudT-=dt;if(hudT<=0){hudT=.16;hud();}}}
   else{intro+=dt;const shot=Math.floor(intro/9)%3,u=(intro%9)/9;const n=STOPS.length;
     if(shot===0){const s0=L*((Math.floor(intro/27)*0.37)%0.85)+30+u*160;const f=frame(s0);camPos.copy(f.p).addScaledVector(f.r,-6+u*4).setY(5+u*3);camLook.copy(worldAt(s0+60,6)).setY(4);S.s=s0;}
     else if(shot===1&&CITY.introC){const c=CITY.introC,a=u*1.6+intro*.01;camPos.set(c.x+Math.cos(a)*170,40+u*30,c.z+Math.sin(a)*170);camLook.set(c.x,80,c.z);S.s=12;}
@@ -1009,6 +1049,12 @@ function finish(){S.running=false;S.v=0;toastT=0;$('toast').style.opacity=0;ui.f
   const grd=fxFinish();lastMsg='🏍️ Moto Mboka '+CITY.name+' : '+fcFmt(S.fc)+', '+S.clients+' clients en '+fmt(S.t)+', de '+STOPS[0].name+' à '+STOPS[STOPS.length-1].name+'. Grade : '+grd+'. Tu fais mieux ? '+SITE+' #MotoMboka';$('wa').href='https://wa.me/?text='+encodeURIComponent(lastMsg);
   $('end').hidden=false;$('share').textContent='Copier mon score';showBest();}
 $('home').onclick=()=>{$('end').hidden=true;$('garage').hidden=true;$('start').hidden=false;showBest();fxHome();refreshRoutes();};
+function pauseGame(){if(!S.running||S.paused)return;S.paused=true;for(const k in touch)touch[k]=0;$('pauseScr').hidden=false;}
+function resumeGame(){S.paused=false;$('pauseScr').hidden=true;last=performance.now();}
+function quitGame(){S.paused=false;S.running=false;S.v=0;S.carrying=null;$('pauseScr').hidden=true;ui.forEach(i=>$(i).hidden=true);fxClean();toastT=0;$('toast').style.opacity=0;$('start').hidden=false;showBest();fxHome();refreshRoutes();}
+$('pause').onclick=pauseGame;$('resume').onclick=resumeGame;$('quit').onclick=quitGame;
+addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='p'||e.key==='P'){if(S.paused)resumeGame();else pauseGame();}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseGame();});
 $('play').onclick=()=>{$('garage').hidden=true;start();};$('again').onclick=start;
 $('share').onclick=()=>{const b=$('share');const done=()=>b.textContent='Score copié';
   if(navigator.clipboard)navigator.clipboard.writeText(lastMsg).then(done,()=>{$('eMsg').textContent=lastMsg;b.textContent='Sélectionne le texte';});else{$('eMsg').textContent=lastMsg;}};
