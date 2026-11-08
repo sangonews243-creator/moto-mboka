@@ -207,6 +207,18 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   #speed{top:calc(64px + env(safe-area-inset-top,0px))!important;bottom:auto!important;font-size:20px!important}
   #fx{top:calc(116px + env(safe-area-inset-top,0px))!important}
 }
+
+/* v1.0.3 */
+.pseudo{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;font-weight:700;margin-top:8px}
+.pseudo input{flex:1;min-width:150px;font:700 16px Archivo,Arial,sans-serif;padding:8px 10px;background:#17191e;color:var(--ink);border:2px solid var(--taxi);user-select:text;-webkit-user-select:text;touch-action:manipulation}
+#pause{width:48px!important;height:48px!important;background:var(--taxi)!important;color:var(--asphalt)!important;border-color:var(--asphalt)!important;font-size:20px!important}
+@media (max-height:520px) and (orientation:landscape){
+  .pad{bottom:calc(22px + env(safe-area-inset-bottom,0px))!important}
+  .pad.l{left:max(18px,calc(env(safe-area-inset-left,0px) + 6px))!important}
+  .pad.r{right:max(18px,calc(env(safe-area-inset-right,0px) + 6px))!important}
+  #mini{bottom:calc(118px + env(safe-area-inset-bottom,0px))!important}
+  #pause{width:44px!important;height:44px!important}
+}
 </style>
 
 <canvas id="c"></canvas>
@@ -244,6 +256,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     <div class="row" id="modes" role="group" aria-label="Mode de jeu"><button class="mode" data-m="full">🏁 Course complète</button><button class="mode" data-m="x">⏱ Express 90 s</button></div>
     <p id="intro"></p>
     <div class="go"><button class="cta big" id="play">▶ Jouer</button><button class="ghost" id="garageBtn">🛠️ Garage</button><span class="fine" id="best"></span></div>
+    <label class="pseudo">Ton pseudo de wewa <input id="pseudo" maxlength="16" placeholder="ex : Papa Wemba 243" autocomplete="nickname" enterkeyhint="done"></label>
     <p class="fine" id="grade"></p><p class="daily" id="daily"></p>
     <p class="keys"><b>But du jeu :</b> tu es un wewa (moto-taxi). Ralentis près du faisceau jaune pour prendre un client, dépose-le au faisceau vert, encaisse. Astuces : frôle les voitures à fond (MAYELE, SLALOM), démarre plein gaz (roue arrière), dépense tes FC au Garage. Bonus sur la route : 🥤 Tangawisi (hyper vitesse), 🌶️ Pili-pili (boule de feu), 🍛 Malewa (protection), 🍩 Mikate (combo), ⛽ Kadhafi (essence), 📣 Atalaku (gains ×2). 🚨 Cortège : serre à droite ! Clavier : <kbd>↑</kbd> gaz · <kbd>↓</kbd> frein · <kbd>←</kbd><kbd>→</kbd> direction · <kbd>H</kbd> klaxon (sur téléphone : bouton bleu KLAXON).</p>
     <p class="credits">Rues réelles © contributeurs OpenStreetMap · Avec <b>SangoNews</b> · <a href="https://wenze.myspreadshop.fr/all" target="_blank" rel="noopener" style="color:var(--taxi)"><b>Boutique Wenze</b></a></p>
@@ -719,10 +732,19 @@ function reset(){Object.assign(S,{s:12,x:7.3,v:0,vx:0,steer:0,fc:0,clients:0,t:0
 /* ---------- Entrées ---------- */
 addEventListener('keydown',e=>{keys[e.key]=1;if(e.key.startsWith('Arrow'))e.preventDefault();});
 addEventListener('keyup',e=>{keys[e.key]=0;});
-function hold(id,k){const b=$(id);const on=e=>{e.preventDefault();try{b.setPointerCapture(e.pointerId);}catch(_){}touch[k]=1;b.classList.add('on');audioInit();if(navigator.vibrate)try{navigator.vibrate(8);}catch(_){}},
-  off=e=>{touch[k]=0;b.classList.remove('on');};
+function hold(id,k){const b=$(id);const on=e=>{if(e.pointerType==='touch')return;e.preventDefault();try{b.setPointerCapture(e.pointerId);}catch(_){}touch[k]=1;b.classList.add('on');audioInit();if(navigator.vibrate)try{navigator.vibrate(8);}catch(_){}},
+  off=e=>{if(e.pointerType==='touch')return;touch[k]=0;b.classList.remove('on');};
   b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('lostpointercapture',off);b.addEventListener('contextmenu',e=>e.preventDefault());}
 hold('bL','l');hold('bR','r');hold('bG','g');hold('bB','b');
+/* tactile robuste : chaque doigt est suivi, on peut glisser d'une flèche à l'autre ; pas d'annulation par le navigateur */
+const PADB={bL:'l',bR:'r',bG:'g',bB:'b'};
+function padAt(x,y){const el=document.elementFromPoint(x,y);const bt=el&&el.closest?el.closest('#bL,#bR,#bG,#bB'):null;return bt?PADB[bt.id]:null;}
+function syncTouches(list){const st={l:0,r:0,g:0,b:0};for(const t of list){const k=padAt(t.clientX,t.clientY);if(k)st[k]=1;}
+  for(const k in st){if(st[k]&&!touch[k]){audioInit();if(navigator.vibrate)try{navigator.vibrate(8);}catch(_){}}touch[k]=st[k];}
+  for(const id in PADB)$(id).classList.toggle('on',!!touch[PADB[id]]);}
+function onTouch(e){if(!S.running||S.paused)return;let inPad=false;for(const t of e.changedTouches){const el=document.elementFromPoint(t.clientX,t.clientY);if(el&&el.closest&&el.closest('.pad')&&!el.closest('#bH'))inPad=true;}
+  syncTouches(e.touches);if(inPad||e.type==='touchmove')e.preventDefault();}
+['touchstart','touchmove','touchend','touchcancel'].forEach(t=>document.addEventListener(t,onTouch,{passive:false}));
 $('bH').addEventListener('pointerdown',e=>{e.preventDefault();audioInit();horn(true);});addEventListener('keydown',e=>{if(e.key==='h'||e.key==='H'||e.key===' ')horn(true);});
 
 /* ---------- Son ---------- */
@@ -780,6 +802,7 @@ const TODAY=new Date().toISOString().slice(0,10), DI=[...TODAY].reduce((a,c)=>a+
 const WEEK=(()=>{const d=new Date(),j=new Date(d.getFullYear(),0,1);return d.getFullYear()+'-'+Math.ceil(((d-j)/864e5+j.getDay()+1)/7);})();
 let PROF={xp:0,runs:0,vest:0,bike:0,daily:'',bank:0,up:{eng:0,brk:0,tank:0,horn:0},own:{vest:[0,1,2],bike:[0,1]},stars:{},mode:'full'};try{Object.assign(PROF,JSON.parse(localStorage.getItem('mm_profile')||'{}'));}catch(e){}
 PROF.up=Object.assign({eng:0,brk:0,tank:0,horn:0},PROF.up);PROF.own=PROF.own||{vest:[0,1,2],bike:[0,1]};PROF.stars=PROF.stars||{};if(!VESTS[PROF.vest]||!PROF.own.vest.includes(PROF.vest))PROF.vest=0;if(!BIKES[PROF.bike]||!PROF.own.bike.includes(PROF.bike))PROF.bike=0;
+const cleanName=s=>(s||'').replace(/[^\p{L}\p{N} _.\-]/gu,'').trim().slice(0,16);
 const fmtFC=n=>Math.round(n).toLocaleString('fr-FR')+' FC';
 const saveProf=()=>{try{localStorage.setItem('mm_profile',JSON.stringify(PROF));}catch(e){}};
 const gradeOf=xp=>{let g=0;GRADES.forEach((x,i)=>{if(xp>=x[0])g=i;});return g;};
@@ -915,7 +938,8 @@ function fxHud(){const fu=$('fuelB');if(fu){fu.style.width=Math.max(0,S.fuel)+'%
   const el=$('fx');const h=b.join('');if(el.innerHTML!==h)el.innerHTML=h;}
 function applyGarage(){if(!player)return;if(!player.userData.own){player.traverse(o=>{if(o.isMesh&&(o.material.name==='vest'||o.material.name==='paint'))o.material=o.material.clone();});player.userData.own=1;}
   player.traverse(o=>{if(!o.isMesh)return;if(o.material.name==='vest')o.material.color.copy(lin(VESTS[PROF.vest]?VESTS[PROF.vest][1]:VESTS[0][1]));if(o.material.name==='paint')o.material.color.copy(lin(BIKES[PROF.bike]?BIKES[PROF.bike][1]:BIKES[0][1]));});}
-function fxHome(){const g=gradeOf(PROF.xp),nx=GRADES[g+1];$('grade').innerHTML='<b>'+GRADES[g][1]+'</b> · '+PROF.xp+' XP · 💰 '+fmtFC(PROF.bank)+'<br>'+(nx?' <small>(prochain : '+nx[1]+' à '+nx[0]+' XP)</small>':' <small>(grade max)</small>');
+function fxHome(){const ni=$('pseudo');if(ni&&document.activeElement!==ni)ni.value=PROF.name||'';
+const g=gradeOf(PROF.xp),nx=GRADES[g+1];$('grade').innerHTML='<b>'+GRADES[g][1]+'</b> · '+PROF.xp+' XP · 💰 '+fmtFC(PROF.bank)+'<br>'+(nx?' <small>(prochain : '+nx[1]+' à '+nx[0]+' XP)</small>':' <small>(grade max)</small>');
   const d=DAILY[DI];$('daily').innerHTML='🎯 <b>Défi du jour :</b> '+d.t+(PROF.daily===TODAY?' <span class="ok">✅ réussi</span>':'')+(MATCHDAY?'<br>⚽ <b>Jour de match :</b> les supporters des Léopards paient ×3':'');}
 function openGarage(){const sw=(arr,key)=>arr.map((v,i)=>{const own=PROF.own[key].includes(i);return '<button class="sw'+(PROF[key]===i?' on':'')+'" data-k="'+key+'" data-i="'+i+'"'+(!own&&PROF.bank<v[2]?' disabled':'')+' style="--s:#'+v[1].toString(16).padStart(6,'0')+'"><i></i>'+v[0]+(own?'':'<small>'+fmtFC(v[2])+'</small>')+'</button>';}).join('');
   $('gBank').innerHTML='💰 Banque : <b>'+fmtFC(PROF.bank)+'</b>';
@@ -945,7 +969,9 @@ function fxFinish(){const xpRun=S.clients*20+S.rep*10+S.convOk*15+S.mayele*5+Mat
   let wk={};try{wk=JSON.parse(localStorage.getItem('mm_week_'+CKEY)||'{}');}catch(e){}if(wk.wk!==WEEK||S.fc>wk.fc){wk={wk:WEEK,fc:S.fc};try{localStorage.setItem('mm_week_'+CKEY,JSON.stringify(wk));}catch(e){}}
   saveProf();$('eXp').innerHTML=msg+'<br><small>Grade : '+GRADES[g1][1]+' · Meilleur de la semaine : '+fcFmt(wk.fc)+'</small>';
   fxClean();fxHome();refreshRoutes();return GRADES[g1][1];}
-$('garageBtn').onclick=openGarage;$('gClose').onclick=()=>{$('garage').hidden=true;};
+$('garageBtn').onclick=openGarage;
+$('pseudo').addEventListener('input',e=>{const v=cleanName(e.target.value);PROF.name=v;saveProf();});
+$('pseudo').addEventListener('change',e=>{e.target.value=PROF.name||'';});$('gClose').onclick=()=>{$('garage').hidden=true;};
 fxHome();
 
 /* ---------- Boucle ---------- */
@@ -1042,19 +1068,20 @@ let pressT=0;$('radio').addEventListener('pointerdown',()=>{pressT=performance.n
 $('radio').onclick=()=>{if(performance.now()-pressT>600||radioOn&&false){}if(performance.now()-pressT>600){radioOff=true;stopRadio();$('radio').textContent='♪ Musique coupée (touche pour relancer)';return;}nextTrack();};
 function getBest(){try{return JSON.parse(localStorage.getItem('mm_best_'+CKEY+(PROF.mode==='x'?'_x':''))||'null');}catch(e){return null;}}
 function showBest(){const b=getBest();$('best').textContent=b?'Record : '+fcFmt(b.fc)+' en '+fmt(b.t):'';}
-function start(){S.express=PROF.mode==='x';audioInit();if(ac&&ac.state==='suspended')ac.resume();startRadio();reset();const f=frame(0);camPos.copy(f.p).add(new THREE.Vector3(0,6,12));S.running=true;$('start').hidden=$('end').hidden=true;ui.forEach(i=>$(i).hidden=false);toast('Yaka ! Go !');}
+function start(){try{history.pushState({mm:1},'');}catch(_){}S.express=PROF.mode==='x';audioInit();if(ac&&ac.state==='suspended')ac.resume();startRadio();reset();const f=frame(0);camPos.copy(f.p).add(new THREE.Vector3(0,6,12));S.running=true;$('start').hidden=$('end').hidden=true;ui.forEach(i=>$(i).hidden=false);toast('Yaka ! Go !');}
 let lastMsg='';
 function finish(){S.running=false;S.v=0;toastT=0;$('toast').style.opacity=0;ui.forEach(i=>$(i).hidden=true);
   const b=getBest();const rec=!b||S.fc>b.fc||(S.fc===b.fc&&S.t<b.t);if(rec){try{localStorage.setItem('mm_best_'+CKEY+(PROF.mode==='x'?'_x':''),JSON.stringify({fc:S.fc,t:S.t}));}catch(e){}}
   $('eFc').textContent=S.fc.toLocaleString('fr-FR');$('eCl').textContent=S.clients;$('eT').textContent=fmt(S.t);
   $('eMsg').textContent=rec?'Nouveau record personnel. Lance le défi à tes amis.':'Record à battre : '+fcFmt(b.fc)+' en '+fmt(b.t)+'.';
-  const grd=fxFinish();lastMsg='🏍️ Moto Mboka '+CITY.name+' : '+fcFmt(S.fc)+', '+S.clients+' clients en '+fmt(S.t)+', de '+STOPS[0].name+' à '+STOPS[STOPS.length-1].name+'. Grade : '+grd+'. Tu fais mieux ? '+SITE+' #MotoMboka';$('wa').href='https://wa.me/?text='+encodeURIComponent(lastMsg);
+  const grd=fxFinish();lastMsg='🏍️ '+(PROF.name?PROF.name+' — ':'')+'Moto Mboka '+CITY.name+' : '+fcFmt(S.fc)+', '+S.clients+' clients en '+fmt(S.t)+', de '+STOPS[0].name+' à '+STOPS[STOPS.length-1].name+'. Grade : '+grd+'. Tu fais mieux ? '+SITE+' #MotoMboka';$('wa').href='https://wa.me/?text='+encodeURIComponent(lastMsg);
   $('end').hidden=false;$('share').textContent='Copier mon score';showBest();}
 $('home').onclick=()=>{$('end').hidden=true;$('garage').hidden=true;$('start').hidden=false;showBest();fxHome();refreshRoutes();};
 function pauseGame(){if(!S.running||S.paused)return;S.paused=true;for(const k in touch)touch[k]=0;$('pauseScr').hidden=false;}
 function resumeGame(){S.paused=false;$('pauseScr').hidden=true;last=performance.now();}
 function quitGame(){S.paused=false;S.running=false;S.v=0;S.carrying=null;$('pauseScr').hidden=true;ui.forEach(i=>$(i).hidden=true);fxClean();toastT=0;$('toast').style.opacity=0;$('start').hidden=false;showBest();fxHome();refreshRoutes();}
-$('pause').onclick=pauseGame;$('resume').onclick=resumeGame;$('quit').onclick=quitGame;
+$('pause').onclick=pauseGame;
+addEventListener('popstate',()=>{if(!S.running)return;if(!S.paused){pauseGame();try{history.pushState({mm:1},'');}catch(_){}}else quitGame();});$('resume').onclick=resumeGame;$('quit').onclick=quitGame;
 addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='p'||e.key==='P'){if(S.paused)resumeGame();else pauseGame();}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseGame();});
 $('play').onclick=()=>{$('garage').hidden=true;start();};$('again').onclick=start;
