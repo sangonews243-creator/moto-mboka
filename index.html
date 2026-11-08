@@ -576,7 +576,7 @@ function buildWorld(){
     st.dest=beacon(0x2ee06b);place(st.dest,st.s,ROAD_H-1.9,0);st.dest.visible=false;world.add(st.dest);
   });
   // portiques SangoNews au-dessus du boulevard
-  for(const f of [.15,.42,.7]){const pg=new THREE.Group();const bb=new THREE.Mesh(new THREE.PlaneGeometry(24,3.2),new THREE.MeshBasicMaterial({map:signTex('ABONNE-TOI À SANGONEWS','YouTube · TikTok · Facebook','#ce1126','#ffffff',24,3.2),side:THREE.DoubleSide}));bb.position.y=8.6;
+  for(const f of [.15,.42,.7]){const pg=new THREE.Group();const gm=new THREE.MeshBasicMaterial({map:signTex('ABONNE-TOI À SANGONEWS','YouTube · TikTok · Facebook','#ce1126','#ffffff',24,3.2)});const bb=new THREE.Group();const bf=new THREE.Mesh(new THREE.PlaneGeometry(24,3.2),gm);const bk=bf.clone();bk.rotation.y=Math.PI;bf.position.z=.06;bk.position.z=-.06;bb.add(bf,bk);bb.position.y=8.6;
     const q1=new THREE.Mesh(new THREE.BoxGeometry(.5,10,.5),M.metal);q1.position.set(-12.5,5,0);const q2=q1.clone();q2.position.x=12.5;pg.add(bb,q1,q2);place(pg,L*f,6.8,0,true);world.add(pg);}
   // arrivée
   const fin=new THREE.Group();{const b=new THREE.Mesh(new THREE.PlaneGeometry(26,3),new THREE.MeshBasicMaterial({map:signTex('ARRIVÉE',STOPS[STOPS.length-1].name,'#ce1126','#ffffff',26,3),side:THREE.DoubleSide}));b.position.y=9;
@@ -656,7 +656,7 @@ function landmarks(places){river();const lm=CITY.landmarks||{};const fs=v=>toU(v
   // passerelles du boulevard Lumumba avec bandeaux publicitaires
   const ads=CITY.ads||[];
   (lm.bridges||[]).forEach((b,k)=>{const m=TPL.passerelle.clone(true);place(m,fs(b),0,0);world.add(m);
-    ['bannerA','bannerB'].forEach((n,j)=>{const ban=m.getObjectByName(n);if(!ban)return;const a=ads[(k*2+j)%ads.length];ban.traverse(x=>{if(x.isMesh)x.material=new THREE.MeshBasicMaterial({map:signTex(a[0],a[1],a[2],a[3],16,1.4),side:THREE.DoubleSide});});});});
+    ['bannerA','bannerB'].forEach((n,j)=>{const ban=m.getObjectByName(n);if(!ban)return;const a=ads[(k*2+j)%ads.length];const bt=signTex(a[0],a[1],a[2],a[3],16,1.4);bt.flipY=false;ban.traverse(x=>{if(x.isMesh)x.material=new THREE.MeshBasicMaterial({map:bt,side:THREE.FrontSide});});});});
   // marchés
   (lm.markets||[]).forEach(([a,b,name])=>{const st=[],pp=[];for(let q=fs(a);q<fs(b);q+=3.4)for(const sd of [-1,1]){for(const x of [WALK0+1.6,WALK1+2.4,WALK1+6.5]){if(Math.random()<.15)continue;
         const v=worldAt(q+rnd(-.6,.6),sd*x);v.y=x<WALK1?.22:0;st.push({p:v,ry:yawAt(q)+(sd>0?-Math.PI/2:Math.PI/2)+rnd(-.15,.15),c:pick([0xce1126,0x0a6ed1,0x2e9e5b,0xf2c230,0xe08a1e,0x8b3fb5])});}
