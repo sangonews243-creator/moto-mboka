@@ -370,6 +370,7 @@ T.glass=tex(256,256,(g,w,h)=>{const gr=g.createLinearGradient(0,0,w,h);gr.addCol
   g.fillStyle='#c9ced3';for(let i=0;i<=w;i+=32)g.fillRect(i,0,3,h);for(let j=0;j<=h;j+=32)g.fillRect(0,j,w,5);g.fillStyle='#9aa3ab';g.fillRect(w-6,0,6,6);},true);
 T.flag=tex(192,128,(g,w,h)=>{g.fillStyle='#0a8fd8';g.fillRect(0,0,w,h);g.save();g.translate(0,h);g.rotate(-Math.atan2(h,w));g.fillStyle='#f7d618';g.fillRect(0,-20,w*1.4,40);g.fillStyle='#ce1021';g.fillRect(0,-13,w*1.4,26);g.restore();
   g.fillStyle='#f7d618';g.beginPath();const cx=32,cy=30,R=18;for(let i=0;i<10;i++){const r=i%2?R*.4:R,a=-Math.PI/2+i*Math.PI/5;g.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));}g.fill();});
+function twoFace(w,h,map){const m=new THREE.MeshBasicMaterial({map});const G=new THREE.Group();const a=new THREE.Mesh(new THREE.PlaneGeometry(w,h),m);const b=a.clone();b.rotation.y=Math.PI;a.position.z=.04;b.position.z=-.04;G.add(a,b);return G;}
 function signTex(text,sub,bg,fg,w,h){return tex(1024,Math.round(1024*h/w),(g,W,H)=>{g.fillStyle=bg;g.fillRect(0,0,W,H);g.strokeStyle=fg;g.lineWidth=8;g.strokeRect(8,8,W-16,H-16);
   g.fillStyle=fg;g.textAlign='center';g.lineWidth=Math.max(6,H*.04);g.font=`bold ${Math.round(H*(sub?.36:.5))}px Bungee, Arial Black, sans-serif`;g.fillText(text,W/2,H*(sub?.48:.64),W-30);
   if(sub){g.font=`700 ${Math.round(H*.2)}px Archivo, Arial, sans-serif`;g.fillText(sub,W/2,H*.8,W-30);}});}
@@ -567,7 +568,7 @@ function buildWorld(){
     const roof=new THREE.Mesh(new THREE.BoxGeometry(6,.15,2.4),new THREE.MeshStandardMaterial({color:0x0a6ed1,roughness:.5}));roof.position.y=2.7;
     const p1=new THREE.Mesh(new THREE.BoxGeometry(.12,2.7,.12),M.metal);p1.position.set(-2.8,1.35,-1);const p2=p1.clone();p2.position.x=2.8;
     const bench=new THREE.Mesh(new THREE.BoxGeometry(4,.12,.5),M.metal);bench.position.set(0,.55,-.8);
-    const panel=new THREE.Mesh(new THREE.PlaneGeometry(8,1.9),new THREE.MeshBasicMaterial({map:signTex(st.name.toUpperCase(),'Arrêt moto-taxi','#0a6ed1','#ffffff',8,1.9),side:THREE.DoubleSide}));panel.position.set(0,3.9,0);
+    const panel=twoFace(8,1.9,signTex(st.name.toUpperCase(),'Arrêt moto-taxi','#0a6ed1','#ffffff',8,1.9));panel.position.set(0,3.9,0);
     g.add(roof,p1,p2,bench,panel);g.traverse(o=>{if(o.isMesh)o.castShadow=true;});place(g,st.s,WALK0+2.2,.22,false);g.rotation.y-=Math.PI/2;world.add(g);
     const umb=new THREE.Mesh(new THREE.ConeGeometry(1.6,.7,10),new THREE.MeshStandardMaterial({color:pick([0xce1126,0x2e9e5b,0xf28c28,0x0a6ed1])}));place(umb,st.s+9,WALK0+3,2.4);umb.castShadow=true;world.add(umb);
     const tab=new THREE.Mesh(new THREE.BoxGeometry(1.4,.8,.8),new THREE.MeshStandardMaterial({color:0x8a6a4a}));place(tab,st.s+9,WALK0+3,.62);world.add(tab);
@@ -579,7 +580,7 @@ function buildWorld(){
   for(const f of [.15,.42,.7]){const pg=new THREE.Group();const gm=new THREE.MeshBasicMaterial({map:signTex('ABONNE-TOI À SANGONEWS','YouTube · TikTok · Facebook','#ce1126','#ffffff',24,3.2)});const bb=new THREE.Group();const bf=new THREE.Mesh(new THREE.PlaneGeometry(24,3.2),gm);const bk=bf.clone();bk.rotation.y=Math.PI;bf.position.z=.06;bk.position.z=-.06;bb.add(bf,bk);bb.position.y=8.6;
     const q1=new THREE.Mesh(new THREE.BoxGeometry(.5,10,.5),M.metal);q1.position.set(-12.5,5,0);const q2=q1.clone();q2.position.x=12.5;pg.add(bb,q1,q2);place(pg,L*f,6.8,0,true);world.add(pg);}
   // arrivée
-  const fin=new THREE.Group();{const b=new THREE.Mesh(new THREE.PlaneGeometry(26,3),new THREE.MeshBasicMaterial({map:signTex('ARRIVÉE',STOPS[STOPS.length-1].name,'#ce1126','#ffffff',26,3),side:THREE.DoubleSide}));b.position.y=9;
+  const fin=new THREE.Group();{const fm=new THREE.MeshBasicMaterial({map:signTex('ARRIVÉE',STOPS[STOPS.length-1].name,'#ce1126','#ffffff',26,3)});const b=new THREE.Group();const bf=new THREE.Mesh(new THREE.PlaneGeometry(26,3),fm);const bk=bf.clone();bk.rotation.y=Math.PI;bf.position.z=.06;bk.position.z=-.06;b.add(bf,bk);b.position.y=9;
     const p1=new THREE.Mesh(new THREE.BoxGeometry(.6,10.5,.6),M.metal);p1.position.set(-13,5.2,0);const p2=p1.clone();p2.position.x=13;fin.add(b,p1,p2);place(fin,L-25,0,0,true);world.add(fin);}
   landmarks(places);
   computeMini();
@@ -631,7 +632,7 @@ function simpleBuilding(p,ry,w,h,d,col,sg){const g=new THREE.Group();const b=new
 function mausolee(tp){const g=new THREE.Group();const wm=new THREE.MeshStandardMaterial({color:0xf6f3ec,roughness:.5});
   const base=new THREE.Mesh(new THREE.CylinderGeometry(9,10,1.2,32),wm);base.position.y=.6;const ro=new THREE.Mesh(new THREE.CylinderGeometry(6,6,5,32),wm);ro.position.y=3.7;
   const dome=new THREE.Mesh(new THREE.SphereGeometry(6.2,32,12,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:0xd4a017,metalness:.7,roughness:.3}));dome.position.y=6.2;
-  const sign=new THREE.Mesh(new THREE.PlaneGeometry(10,1.6),new THREE.MeshBasicMaterial({map:signTex('MAUSOLÉE LUMUMBA','Patrice Emery Lumumba · 1925–1961','#17191e','#f2c230',10,1.6),side:THREE.DoubleSide}));sign.position.set(0,2.2,6.1);
+  const sign=twoFace(10,1.6,signTex('MAUSOLÉE LUMUMBA','Patrice Emery Lumumba · 1925–1961','#17191e','#f2c230',10,1.6));sign.position.set(0,2.2,6.1);
   g.add(base,ro,dome,sign);g.traverse(o=>{if(o.isMesh)o.castShadow=true;});g.position.copy(tp).add(new THREE.Vector3(-26,0,22));g.rotation.y=facing(g.position);world.add(g);}
 function river(){const lm=CITY.landmarks||{};if(lm.riverZ===undefined)return;const sc=CITY.scale||1,z0=lm.riverZ*sc,cx=P[N-1].x;
   const w=new THREE.Mesh(new THREE.PlaneGeometry(9000,5000),new THREE.MeshStandardMaterial({color:0x6b7f74,roughness:.15,metalness:.3}));w.rotation.x=-Math.PI/2;w.position.set(cx,0.02,z0-2500);w.receiveShadow=true;world.add(w);
@@ -649,7 +650,7 @@ function landmarks(places){river();const lm=CITY.landmarks||{};const fs=v=>toU(v
       if(nm==='banner'&&o.key==='martyrs'){x.material=new THREE.MeshBasicMaterial({map:T.strip,side:THREE.DoubleSide});}});}
     const LBL={nation:'PALAIS DE LA NATION',pullman:'PULLMAN GRAND HÔTEL',tata:'STADE TATA RAPHAËL',martyrs:'STADE DES MARTYRS',gare:'PLACE DE LA GARE',palais:'PALAIS DU PEUPLE',hotel:'HÔTEL DE VILLE',sozacom:'IMMEUBLE SOZACOM',onatra:'ONATRA',rtnc:'RTNC',fikin:'FIKIN',musee:'MUSÉE NATIONAL',tower:'TOUR DE L\'ÉCHANGEUR'}[o.key];
     if(LBL){const n=nearestRoad(o.p);const dir=new THREE.Vector3(n.p.x-o.p.x,0,n.p.z-o.p.z).normalize();const v=o.p.clone().addScaledVector(dir,Math.max(2,n.d-WALK1-2));
-      const g=new THREE.Group();const pn=new THREE.Mesh(new THREE.PlaneGeometry(15,2.8),new THREE.MeshBasicMaterial({map:signTex(LBL,CITY.name,'#0a6ed1','#ffffff',15,2.8),side:THREE.DoubleSide}));pn.position.y=5.2;
+      const g=new THREE.Group();const pn=twoFace(15,2.8,signTex(LBL,CITY.name,'#0a6ed1','#ffffff',15,2.8));pn.position.y=5.2;
       for(const px of [-7,7]){const pl=new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,5,6),M.metal);pl.position.set(px,2.5,0);g.add(pl);}g.add(pn);g.position.copy(v);g.rotation.y=Math.atan2(dir.x,dir.z);world.add(g);}
     if(['palais','hotel','onatra','sozacom','nation'].includes(o.key)){const fl=[];for(const dx of [-8,0,8]){const v=new THREE.Vector3(dx,0,o.r*.55+6).applyAxisAngle(new THREE.Vector3(0,1,0),o.ry).add(o.p);fl.push({p:v,ry:o.ry});}instGLB('flag',fl);}});
   if(places.length&&places[0].key==='tower')CITY.introC=places[0].p.clone();
@@ -666,7 +667,7 @@ function landmarks(places){river();const lm=CITY.landmarks||{};const fs=v=>toU(v
     inst(UMB,new THREE.MeshStandardMaterial({map:T.rainbow,side:THREE.DoubleSide,roughness:.7}),um,false);
     inst(new THREE.CylinderGeometry(.04,.04,2.5,5).translate(0,-1.2,0),M.metal,um,false);
     instGLB('stall',st.filter((_,i)=>i%3===0).map(q=>({p:q.p,ry:q.ry,c:0xffffff})),'tarp');
-    for(const sd of [-1,1]){const g=new THREE.Group();const ban=new THREE.Mesh(new THREE.PlaneGeometry(14,2.4),new THREE.MeshBasicMaterial({map:signTex(name,'Marché',sd>0?'#f2c230':'#0a6ed1',sd>0?'#17191e':'#ffffff',14,2.4),side:THREE.DoubleSide}));ban.position.y=6.2;
+    for(const sd of [-1,1]){const g=new THREE.Group();const ban=twoFace(14,2.4,signTex(name,'Marché',sd>0?'#f2c230':'#0a6ed1',sd>0?'#17191e':'#ffffff',14,2.4));ban.position.y=6.2;
       for(const px of [-7,7]){const pl=new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,7.4,6),M.metal);pl.position.set(px,3.7,0);g.add(pl);}g.add(ban);place(g,fs(a)+4,sd*(WALK0+2.7),0);g.rotation.y+=sd>0?-Math.PI/2:Math.PI/2;world.add(g);}});
   // malewa (boui-boui) sur les trottoirs
   const mw=[];for(let q=40;q<L-60;q+=rnd(120,240)){const sd=Math.random()<.5?-1:1;const v=worldAt(q,sd*(WALK1-1.9));if(excluded(v))continue;v.y=.22;
