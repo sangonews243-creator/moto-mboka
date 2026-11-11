@@ -221,6 +221,22 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   #mini{bottom:calc(118px + env(safe-area-inset-bottom,0px))!important}
   #pause{width:44px!important;height:44px!important}
 }
+
+/* v1.1.0 — liste des circuits compacte et bien cadrée */
+.home{align-content:start}
+.hero{align-content:safe end}
+#routes{grid-template-columns:1fr;gap:6px;max-height:none}
+#routes button{grid-template-columns:34px 1fr auto;grid-template-areas:"n t k" "n t st";column-gap:10px;row-gap:1px;padding:7px 10px;transform:skewX(-4deg)}
+#routes button>*{transform:skewX(4deg)}
+#routes button b{grid-area:n;font-size:22px;align-self:center}
+#routes button span{grid-area:t;font-size:14px;line-height:1.15;min-width:0}
+#routes button span small{display:block;font-size:11px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#routes button i{grid-area:k;font-size:12px;justify-self:end;align-self:center}
+#routes .city em.st{grid-area:st;justify-self:end;font-size:12px;margin:0;letter-spacing:.04em}
+#routes button:hover{transform:skewX(-4deg) translateX(3px)}
+#routes button{background:rgba(14,12,16,.78);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}#routes .city.lock{opacity:.8}#routes .city.lock span{color:rgba(246,241,228,.75)}
+@media (min-width:760px) and (min-height:500px){#routes{grid-template-columns:1fr 1fr}.hero{max-width:720px}}
+@media (max-height:500px){#routes{grid-template-columns:1fr 1fr}#routes button span small{display:none}#routes button{padding:5px 8px}.hero{max-width:760px;gap:10px}}
 </style>
 
 <canvas id="c"></canvas>
@@ -978,7 +994,7 @@ function starsFor(){const T=STH();if(S.express)return S.fc>=money(T.x[2])?3:S.fc
   const arr=S.s>=L-25;let n=arr?1:0;if(arr&&S.fc>=money(T.f[0]))n=2;if(n===2&&S.fc>=money(T.f[1])&&S.crashes<=1)n=3;return n;}
 function setMode(m){PROF.mode=m;saveProf();document.querySelectorAll('#modes .mode').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));showBest();}
 document.querySelectorAll('#modes .mode').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
-function refreshRoutes(){document.querySelectorAll('#routes .city').forEach((b,i)=>{const lk=routeLocked(i),e=b.querySelector('em.st');b.classList.toggle('lock',lk);if(e)e.textContent=lk?'🔒 2★ sur le circuit '+i:starStr(Math.max(PROF.stars['kinshasa_'+i]||0,PROF.stars['kinshasa_'+i+'_x']||0));});}
+function refreshRoutes(){try{$('start').scrollTop=0;}catch(e){}document.querySelectorAll('#routes .city').forEach((b,i)=>{const lk=routeLocked(i),e=b.querySelector('em.st');b.classList.toggle('lock',lk);if(e)e.textContent=lk?'🔒 2★ au '+String(i).padStart(2,'0'):starStr(Math.max(PROF.stars['kinshasa_'+i]||0,PROF.stars['kinshasa_'+i+'_x']||0));});}
 function fxClean(){FX.rainT=FX.nightT=0;FX.rainK=FX.nightK=0;fxEnv();if(FX.convoy)endConvoy();if(sirG)sirG.gain.value=0;if(rainG)rainG.gain.value=0;
   aura.visible=shieldS.visible=hyperS.visible=false;FX.flames.forEach(f=>{f.life=0;f.sp.visible=false;});}
 function fxFinish(){const xpRun=S.clients*20+S.rep*10+S.convOk*15+S.mayele*5+Math.floor(S.fc/100);const g0=gradeOf(PROF.xp);let msg='+'+xpRun+' XP';
@@ -1116,7 +1132,7 @@ let RI=0;
 function setCity(key,ri){RI=ri||0;const base=CITIES[key];CKEY=key+(base.routes?'_'+RI:'');CITY=Object.assign({},base,base.routes?base.routes[RI]:{});loadRoute(CITY);
   const rb=$('routes');rb.innerHTML='';rb.hidden=!base.routes;(base.routes||[]).forEach((r,i)=>{const R_=Object.assign({},base,r);let km=0;for(let j=1;j<R_.wp.length;j++)km+=Math.hypot(R_.wp[j][0]-R_.wp[j-1][0],R_.wp[j][1]-R_.wp[j-1][1]);
     const b=document.createElement('button');b.className='city';b.innerHTML='<b>0'+(i+1)+'</b><span>'+r.rname+'<small>'+[...new Set(R_.streets.map(x=>x[1]))].slice(0,2).join(' · ')+'</small></span><i>'+(km/1000).toFixed(1).replace('.',',')+' km</i>';
-    const lk=routeLocked(i);b.insertAdjacentHTML('beforeend','<em class="st">'+(lk?'🔒 2★ sur le circuit '+i:starStr(Math.max(PROF.stars[key+'_'+i]||0,PROF.stars[key+'_'+i+'_x']||0)))+'</em>');if(lk)b.classList.add('lock');
+    const lk=routeLocked(i);b.insertAdjacentHTML('beforeend','<em class="st">'+(lk?'🔒 2★ au '+String(i).padStart(2,'0'):starStr(Math.max(PROF.stars[key+'_'+i]||0,PROF.stars[key+'_'+i+'_x']||0)))+'</em>');if(lk)b.classList.add('lock');
     b.setAttribute('aria-pressed',i===RI);b.onclick=()=>{if(routeLocked(i)){$('intro').textContent='🔒 Circuit verrouillé : gagne au moins 2 étoiles sur le circuit '+i+' (course complète ou express) pour le débloquer.';return;}setCity(key,i);};rb.appendChild(b);});buildWorld();fxBuild();buildTraffic();reset();
   document.querySelectorAll('#cities .city').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===key));
   const first=STOPS[0].name,lastS=STOPS[STOPS.length-1].name;
